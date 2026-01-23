@@ -5,14 +5,15 @@
 namespace popl {
 class Diagnostics {
    public:
-    void Error(unsigned int line, std::string_view message);
-    bool HadError() const { return m_had_error; }
+    static void Error(unsigned int line, std::string_view message);
+    static bool HadError() { return ms_had_error; }
+    static void ResetError() { ms_had_error = false; }
 
    private:
-    void Report(unsigned int line, std::string_view where,
-                std::string_view message);
+    static void Report(unsigned int line, std::string_view where,
+                       std::string_view message);
 
    private:
-    bool m_had_error;
+    static bool ms_had_error;
 };
 }  // namespace popl
