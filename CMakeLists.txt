@@ -1,7 +1,11 @@
-cmake_minimum_required(VERSION 4.21)
+cmake_minimum_required(VERSION 4.2.1)
 
-project (PopL VERSION 0.1.0 
-              DESCRIPTION "A small Interpreter"
-              LANGUAGES CXX)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(PopL src/main.cpp)
+project(PopL
+    VERSION 0.1.0
+    DESCRIPTION "A small Interpreter"
+    LANGUAGES CXX
+)
+
+add_subdirectory(src)

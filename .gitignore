@@ -1,2 +1,18 @@
-build
+# Executables
+*.exe
+*.out
+*.app
+
+# Build directories
+build/
+Build/
+build-*/
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+.cache
+install_manifest.txt 
 compile_commands.json
