@@ -5,6 +5,7 @@
 #include <string>
 #include <string_view>
 
+#include "popl/diagnostics.hpp"
 #include "popl/utils.hpp"
 
 namespace popl {
@@ -14,16 +15,15 @@ int Driver::Init(int argc, char** argv) {
         PrintUsage();
         return 64;
     } else if (argc == 2) {
-        RunFile(argv[1]);
+        return RunFile(argv[1]);
     } else {
-        RunRepl();
+        return RunRepl();
     }
-    return 0;
 }
 
 void Driver::PrintUsage() const { std::print("Usage: popl [script]"); }
 
-void Driver::RunRepl() {
+int Driver::RunRepl() {
     std::string line;
     for (;;) {
         std::print("> ");
@@ -31,15 +31,20 @@ void Driver::RunRepl() {
             break;
         }
         Run(line);
+        Diagnostics::ResetError();
     }
+    return 0;
 }
 
-void Driver::RunFile(std::string_view path) {
+int Driver::RunFile(std::string_view path) {
     try {
-        std::string content = utils::ReadFile(path);
-        std::print("File content:\n{}\n", content);
+        Run(utils::ReadFile(path));
+        if (Diagnostics::HadError()) {
+            return 65;
+        }
     } catch (const std::runtime_error& e) {
         std::print("Error: {}\n", e.what());
     }
+    return 74;
 }
 };  // namespace popl

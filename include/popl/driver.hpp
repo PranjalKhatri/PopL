@@ -11,8 +11,8 @@ class Driver {
 
    private:
     void Run(std::string source);
-    void RunRepl();
-    void RunFile(std::string_view path);
+    int  RunRepl();
+    int  RunFile(std::string_view path);
     void PrintUsage() const;
 };
 
