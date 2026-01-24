@@ -4,11 +4,10 @@
 #include <string_view>
 #include <variant>
 
-#include "magic_enum/magic_enum.hpp"
 #include "token_types.hpp"
 
 namespace popl {
-using Literal = std::variant<double, std::string, bool, std::monostate>;
+using Literal = std::variant<std::monostate, double, std::string, bool>;
 class Token {
    public:
     Token(TokenType type, std::string lexeme, Literal literal,
