@@ -8,6 +8,7 @@ add_executable(PopL
 target_include_directories(PopL
    PRIVATE
    ${PROJECT_SOURCE_DIR}/include
+   ${PROJECT_SOURCE_DIR}/external
 )
 
 target_compile_features(PopL
