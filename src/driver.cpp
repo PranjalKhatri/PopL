@@ -6,6 +6,7 @@
 #include <string_view>
 
 #include "popl/diagnostics.hpp"
+#include "popl/lexer/lexer.hpp"
 #include "popl/utils.hpp"
 
 namespace popl {
@@ -46,5 +47,13 @@ int Driver::RunFile(std::string_view path) {
         std::print("Error: {}\n", e.what());
     }
     return 74;
+}
+
+void Driver::Run(std::string source) {
+    Lexer lexer{std::move(source)};
+    auto  tokens{lexer.ScanTokens()};
+    for (const auto& token : tokens) {
+        std::println("{}", token);
+    }
 }
 };  // namespace popl
