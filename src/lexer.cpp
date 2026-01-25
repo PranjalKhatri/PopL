@@ -1,5 +1,7 @@
 #include "popl/lexer/lexer.hpp"
 
+#include <cctype>
+
 #include "popl/diagnostics.hpp"
 #include "popl/lexer/token_types.hpp"
 
@@ -12,11 +14,38 @@ bool Lexer::Match(char expected) {
     return true;
 }
 
-char Lexer::Peek() {
+char Lexer::Peek() const {
     if (ReachedEnd()) return '\0';
     return m_source.at(m_current);
 }
-
+char Lexer::PeekNext() const {
+    if (m_current + 1 >= m_source.length()) return '\0';
+    return m_source.at(m_current + 1);
+}
+void Lexer::ScanStringLiteral() {
+    while (Peek() != '\"' && !ReachedEnd()) {
+        if (Peek() == '\n') m_line++;
+        Advance();
+    }
+    if (ReachedEnd()) {
+        Diagnostics::Error(m_line, "Unterminated String");
+        return;
+    }
+    Advance();  // closing "
+    std::string value =
+        m_source.substr(m_start + 1, GetCurrentLiteralLength() - 1);
+    AddToken(TokenType::STRING, Literal{value});
+}
+void Lexer::ScanNumberLiteral() {
+    while (std::isdigit(Peek())) Advance();
+    // consume .
+    if (Peek() == '.' && isdigit(PeekNext())) {
+        Advance();
+        while (std::isdigit(Peek())) Advance();
+    }
+    AddToken(TokenType::NUMBER,
+             std::stod(m_source.substr(m_start, GetCurrentLiteralLength())));
+}
 void Lexer::ScanToken() {
     char c = Advance();
     switch (c) {
@@ -78,14 +107,20 @@ void Lexer::ScanToken() {
         case '\n':
             m_line++;
             break;
+        case '\"':
+            ScanStringLiteral();
+            break;
         default:
-            Diagnostics::Error(m_line, "Unexpected character");
+            if (std::isdigit(c)) {
+                ScanNumberLiteral();
+            } else
+                Diagnostics::Error(m_line, "Unexpected character");
             break;
     }
 }
 
 void Lexer::AddToken(TokenType type, Literal literal) {
-    std::string text = m_source.substr(m_start, m_current);
+    std::string text = m_source.substr(m_start, GetCurrentLiteralLength());
     m_tokens.emplace_back(type, std::move(text), std::move(literal), m_line);
 }
 

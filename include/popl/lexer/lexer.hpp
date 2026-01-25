@@ -13,21 +13,26 @@ class Lexer {
     Lexer(std::string source) : m_source(std::move(source)) {}
 
    private:
-    bool ReachedEnd() const { return m_current > m_source.size(); }
-    char Peek() const;
+    bool   ReachedEnd() const { return m_current > m_source.size(); }
+    char   Peek() const;
+    char   PeekNext() const;
+    size_t GetCurrentLiteralLength() const { return m_current - m_start + 1; }
+
     bool Match(char expected);
     void ScanToken();
+    void ScanStringLiteral();
+    void ScanNumberLiteral();
     void AddToken(TokenType type) { AddToken(type, Literal{}); }
-    char Advance() { return m_source.at(m_current++); }
     void AddToken(TokenType type, Literal literal);
+    char Advance() { return m_source.at(m_current++); }
 
    private:
     std::string        m_source;
     std::vector<Token> m_tokens{};
 
-    unsigned int m_start{};    // first character in lexeme being scanned
-    unsigned int m_current{};  // current character in lexeme being scanned
-    unsigned int m_line{1};    // source line currently scanned
+    size_t m_start{};    // first character in lexeme being scanned
+    size_t m_current{};  // current character in lexeme being scanned
+    size_t m_line{1};    // source line currently scanned
 };
 
 };  // namespace popl
