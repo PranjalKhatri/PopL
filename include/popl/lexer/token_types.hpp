@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+#include <cstddef>
 #include <ostream>
 
 #include "magic_enum/magic_enum.hpp"
@@ -7,7 +9,7 @@
 namespace popl {
 enum class TokenType {
     // Single-character tokens.
-    LEFT_PAREN,
+    LEFT_PAREN = 0,
     RIGHT_PAREN,
     LEFT_BRACE,
     RIGHT_BRACE,
@@ -52,8 +54,41 @@ enum class TokenType {
     VAR,
     WHILE,
 
-    END_OF_FILE
+    END_OF_FILE,
+
+    TOKEN_COUNT
+
 };
+struct Keyword {
+    std::string_view text;
+    TokenType        type;
+};
+
+constexpr std::array<Keyword, 16> Keywords = {{
+    {"and", TokenType::AND},
+    {"class", TokenType::CLASS},
+    {"else", TokenType::ELSE},
+    {"false", TokenType::FALSE},
+    {"for", TokenType::FOR},
+    {"fun", TokenType::FUN},
+    {"if", TokenType::IF},
+    {"nil", TokenType::NIL},
+    {"or", TokenType::OR},
+    {"print", TokenType::PRINT},
+    {"return", TokenType::RETURN},
+    {"super", TokenType::SUPER},
+    {"this", TokenType::THIS},
+    {"true", TokenType::TRUE},
+    {"var", TokenType::VAR},
+    {"while", TokenType::WHILE},
+}};
+
+constexpr TokenType KeywordOrIdentifier(std::string_view s) {
+    for (const auto& [kw, type] : Keywords) {
+        if (kw == s) return type;
+    }
+    return TokenType::IDENTIFIER;
+}
 inline std::ostream& operator<<(std::ostream&   os,
                                 popl::TokenType type) noexcept {
     os << magic_enum::enum_name(type);
