@@ -3,6 +3,7 @@ add_executable(PopL
                 diagnostics.cpp
                 driver.cpp
                 utils.cpp
+                lexer.cpp
 )
 
 target_include_directories(PopL
