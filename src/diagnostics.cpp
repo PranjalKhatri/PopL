@@ -15,7 +15,7 @@ void Diagnostics::Error(unsigned int line, std::string_view message) {
 void Diagnostics::Report(unsigned int line, std::string_view where,
                          std::string_view message) {
     ms_had_error = true;
-    std::print(stderr, "[line {}] Error {} : {}", line, where, message);
+    std::println(stderr, "[line {}] Error {} : {}", line, where, message);
 }
 
 };  // namespace popl
