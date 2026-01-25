@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cctype>
 #include <string>
 #include <vector>
 
@@ -17,11 +18,18 @@ class Lexer {
     char   Peek() const;
     char   PeekNext() const;
     size_t GetCurrentLiteralLength() const { return m_current - m_start + 1; }
+    bool   IsAlphaOrUnderScore(char c) const {
+        return std::isalpha(c) || (c == '_');
+    }
+    bool IsAlphaNumOrUnderScore(char c) const {
+        return IsAlphaOrUnderScore(c) || std::isdigit(c);
+    }
 
     bool Match(char expected);
     void ScanToken();
     void ScanStringLiteral();
     void ScanNumberLiteral();
+    void ScanIdentifier();
     void AddToken(TokenType type) { AddToken(type, Literal{}); }
     void AddToken(TokenType type, Literal literal);
     char Advance() { return m_source.at(m_current++); }

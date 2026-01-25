@@ -33,8 +33,8 @@ void Lexer::ScanStringLiteral() {
     }
     Advance();  // closing "
     std::string value =
-        m_source.substr(m_start + 1, GetCurrentLiteralLength() - 1);
-    AddToken(TokenType::STRING, Literal{value});
+        m_source.substr(m_start + 1, GetCurrentLiteralLength() - 2);
+    AddToken(TokenType::STRING, Literal{std::move(value)});
 }
 void Lexer::ScanNumberLiteral() {
     while (std::isdigit(Peek())) Advance();
@@ -45,6 +45,13 @@ void Lexer::ScanNumberLiteral() {
     }
     AddToken(TokenType::NUMBER,
              std::stod(m_source.substr(m_start, GetCurrentLiteralLength())));
+}
+void Lexer::ScanIdentifier() {
+    while (IsAlphaNumOrUnderScore(Peek())) Advance();
+    std::string_view text{m_source.data(), GetCurrentLiteralLength()};
+
+    TokenType type = popl::KeywordOrIdentifier(text);
+    AddToken(type);
 }
 void Lexer::ScanToken() {
     char c = Advance();
@@ -113,8 +120,11 @@ void Lexer::ScanToken() {
         default:
             if (std::isdigit(c)) {
                 ScanNumberLiteral();
-            } else
+            } else if (IsAlphaOrUnderScore(c)) {
+                ScanIdentifier();
+            } else {
                 Diagnostics::Error(m_line, "Unexpected character");
+            }
             break;
     }
 }
