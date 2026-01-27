@@ -12,21 +12,33 @@ namespace popl {
 class Lexer {
    public:
     Lexer(std::string source) : m_source(std::move(source)) {}
+    std::vector<Token> ScanTokens();
+
+    std::vector<Token> GetTokens() const { return m_tokens; }
 
    private:
-    bool   ReachedEnd() const { return m_current > m_source.size(); }
+    bool   ReachedEnd() const { return m_current >= m_source.size(); }
     char   Peek() const;
     char   PeekNext() const;
-    size_t GetCurrentLiteralLength() const { return m_current - m_start + 1; }
-    bool   IsAlphaOrUnderScore(char c) const {
+    size_t GetCurrentLiteralLength() const { return m_current - m_start; }
+    std::string_view GetCurrentLiteralView() const {
+        return std::string_view(m_source).substr(m_start,
+                                                 GetCurrentLiteralLength());
+    }
+    std::string GetCurrentLiteralString() const {
+        return std::string{m_source.data() + m_start,
+                           GetCurrentLiteralLength()};
+    }
+    bool IsAlphaOrUnderScore(char c) const {
         return std::isalpha(c) || (c == '_');
     }
     bool IsAlphaNumOrUnderScore(char c) const {
         return IsAlphaOrUnderScore(c) || std::isdigit(c);
     }
 
-    bool Match(char expected);
     void ScanToken();
+    bool Match(char expected);
+    void SkipBlockComment();
     void ScanStringLiteral();
     void ScanNumberLiteral();
     void ScanIdentifier();
@@ -39,7 +51,7 @@ class Lexer {
     std::vector<Token> m_tokens{};
 
     size_t m_start{};    // first character in lexeme being scanned
-    size_t m_current{};  // current character in lexeme being scanned
+    size_t m_current{};  // current character in lexeme to be scanned
     size_t m_line{1};    // source line currently scanned
 };
 

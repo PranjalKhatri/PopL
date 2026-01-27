@@ -1,6 +1,7 @@
 #include "popl/lexer/lexer.hpp"
 
 #include <cctype>
+#include <variant>
 
 #include "popl/diagnostics.hpp"
 #include "popl/lexer/token_types.hpp"
@@ -43,8 +44,7 @@ void Lexer::ScanNumberLiteral() {
         Advance();
         while (std::isdigit(Peek())) Advance();
     }
-    AddToken(TokenType::NUMBER,
-             std::stod(m_source.substr(m_start, GetCurrentLiteralLength())));
+    AddToken(TokenType::NUMBER, std::stod(GetCurrentLiteralString()));
 }
 void Lexer::ScanIdentifier() {
     while (IsAlphaNumOrUnderScore(Peek())) Advance();
@@ -52,6 +52,32 @@ void Lexer::ScanIdentifier() {
 
     TokenType type = popl::KeywordOrIdentifier(text);
     AddToken(type);
+}
+
+void Lexer::SkipBlockComment() {
+    bool   Done      = false;
+    size_t lineStart = m_line;
+    while (!Done && !ReachedEnd()) {
+        if (Peek() == '*' && PeekNext() == '/') {
+            Advance();
+            Done = true;
+        } else if (Peek() == '\n') {
+            m_line++;
+        }
+        Advance();
+    }
+    if (!Done) {
+        Diagnostics::Error(lineStart, "Block Comment End Not Found");
+    }
+}
+
+std::vector<Token> Lexer::ScanTokens() {
+    while (!ReachedEnd()) {
+        m_start = m_current;
+        ScanToken();
+    }
+    m_tokens.emplace_back(TokenType::END_OF_FILE, "", std::monostate{}, m_line);
+    return m_tokens;
 }
 void Lexer::ScanToken() {
     char c = Advance();
@@ -101,8 +127,11 @@ void Lexer::ScanToken() {
             break;
         case '/':
             if (Match('/')) {
-                // A comment goes until the end of the line.
+                // Line Comment
                 while (Peek() != '\n' && !ReachedEnd()) Advance();
+            } else if (Match('*')) {
+                // Block Comment
+                SkipBlockComment();
             } else {
                 AddToken(TokenType::SLASH);
             }
@@ -130,7 +159,7 @@ void Lexer::ScanToken() {
 }
 
 void Lexer::AddToken(TokenType type, Literal literal) {
-    std::string text = m_source.substr(m_start, GetCurrentLiteralLength());
+    std::string text{GetCurrentLiteralString()};
     m_tokens.emplace_back(type, std::move(text), std::move(literal), m_line);
 }
 
