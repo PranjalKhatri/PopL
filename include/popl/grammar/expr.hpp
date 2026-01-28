@@ -36,16 +36,14 @@ struct Expr {
     Variant node;
 };
 
-struct ExprVisitor {
-    virtual ~ExprVisitor()                      = default;
-    virtual void operator()(BinaryExpr& expr)   = 0;
-    virtual void operator()(GroupingExpr& expr) = 0;
-    virtual void operator()(LiteralExpr& expr)  = 0;
-    virtual void operator()(UnaryExpr& expr)    = 0;
-};
+template <typename Visitor>
+decltype(auto) visitExpr(Expr& expr, Visitor&& visitor) {
+    return std::visit(std::forward<Visitor>(visitor), expr.node);
+}
 
-inline void visitExpr(Expr& expr, ExprVisitor& visitor) {
-    std::visit(visitor, expr.node);
+template <typename Visitor>
+decltype(auto) visitExpr(const Expr& expr, Visitor&& visitor) {
+    return std::visit(std::forward<Visitor>(visitor), expr.node);
 }
 
 }  // namespace popl
