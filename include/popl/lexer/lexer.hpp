@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "popl/lexer/token_types.hpp"
+#include "popl/literal.hpp"
 #include "token.hpp"
 
 namespace popl {
@@ -42,8 +43,8 @@ class Lexer {
     void ScanStringLiteral();
     void ScanNumberLiteral();
     void ScanIdentifier();
-    void AddToken(TokenType type) { AddToken(type, Literal{}); }
-    void AddToken(TokenType type, Literal literal);
+    void AddToken(TokenType type) { AddToken(type, PopLObject{}); }
+    void AddToken(TokenType type, PopLObject literal);
     char Advance() { return m_source.at(m_current++); }
 
    private:

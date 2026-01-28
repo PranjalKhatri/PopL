@@ -5,6 +5,7 @@
 
 #include "popl/diagnostics.hpp"
 #include "popl/lexer/token_types.hpp"
+#include "popl/literal.hpp"
 
 namespace popl {
 
@@ -35,7 +36,7 @@ void Lexer::ScanStringLiteral() {
     Advance();  // closing "
     std::string value =
         m_source.substr(m_start + 1, GetCurrentLiteralLength() - 2);
-    AddToken(TokenType::STRING, Literal{std::move(value)});
+    AddToken(TokenType::STRING, PopLObject{std::move(value)});
 }
 void Lexer::ScanNumberLiteral() {
     while (std::isdigit(Peek())) Advance();
@@ -44,7 +45,8 @@ void Lexer::ScanNumberLiteral() {
         Advance();
         while (std::isdigit(Peek())) Advance();
     }
-    AddToken(TokenType::NUMBER, std::stod(GetCurrentLiteralString()));
+    AddToken(TokenType::NUMBER,
+             PopLObject{std::stod(GetCurrentLiteralString())});
 }
 void Lexer::ScanIdentifier() {
     while (IsAlphaNumOrUnderScore(Peek())) Advance();
@@ -76,7 +78,8 @@ std::vector<Token> Lexer::ScanTokens() {
         m_start = m_current;
         ScanToken();
     }
-    m_tokens.emplace_back(TokenType::END_OF_FILE, "", std::monostate{}, m_line);
+    m_tokens.emplace_back(TokenType::END_OF_FILE, "",
+                          PopLObject{std::monostate{}}, m_line);
     return m_tokens;
 }
 void Lexer::ScanToken() {
@@ -158,7 +161,7 @@ void Lexer::ScanToken() {
     }
 }
 
-void Lexer::AddToken(TokenType type, Literal literal) {
+void Lexer::AddToken(TokenType type, PopLObject literal) {
     std::string text{GetCurrentLiteralString()};
     m_tokens.emplace_back(type, std::move(text), std::move(literal), m_line);
 }
