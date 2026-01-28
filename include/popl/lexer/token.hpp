@@ -17,6 +17,8 @@ class Token {
           line(line) {}
     friend std::ostream& operator<<(std::ostream& os, const Token& token);
     friend struct std::formatter<Token>;
+    std::string GetLexeme() const { return lexeme; }
+    PopLObject  GetLiteral() const { return literal; }
 
    private:
     const TokenType    type;
