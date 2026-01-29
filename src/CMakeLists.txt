@@ -4,6 +4,7 @@ add_executable(PopL
                 driver.cpp
                 utils.cpp
                 lexer.cpp
+                parser.cpp
 )
 
 target_include_directories(PopL
