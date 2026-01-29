@@ -1,6 +1,6 @@
 #pragma once
 
-#include "popl/grammar/expr.hpp"
+#include "popl/syntax/ast/expr.hpp"
 
 namespace popl {
 struct AstPrinter {

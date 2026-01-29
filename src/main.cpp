@@ -2,11 +2,11 @@
 #include <memory>
 #include <popl/driver.hpp>
 
-#include "popl/grammar/ast_printer.hpp"
-#include "popl/grammar/expr.hpp"
 #include "popl/lexer/token.hpp"
 #include "popl/lexer/token_types.hpp"
 #include "popl/literal.hpp"
+#include "popl/syntax/ast/expr.hpp"
+#include "popl/syntax/visitors/ast_printer.hpp"
 
 using namespace popl;
 int main(int argc, char** argv) {
