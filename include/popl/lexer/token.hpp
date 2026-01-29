@@ -11,20 +11,22 @@ class Token {
    public:
     Token(TokenType type, std::string lexeme, PopLObject literal,
           unsigned int line)
-        : type(type),
-          lexeme(std::move(lexeme)),
-          literal(std::move(literal)),
-          line(line) {}
+        : m_type(type),
+          m_lexeme(std::move(lexeme)),
+          m_literal(std::move(literal)),
+          m_line(line) {}
+    TokenType   GetType() const { return m_type; }
+    std::string GetLexeme() const { return m_lexeme; }
+    PopLObject  GetLiteral() const { return m_literal; }
+
     friend std::ostream& operator<<(std::ostream& os, const Token& token);
     friend struct std::formatter<Token>;
-    std::string GetLexeme() const { return lexeme; }
-    PopLObject  GetLiteral() const { return literal; }
 
    private:
-    const TokenType    type;
-    const std::string  lexeme;
-    const PopLObject   literal;
-    const unsigned int line;
+    const TokenType    m_type;
+    const std::string  m_lexeme;
+    const PopLObject   m_literal;
+    const unsigned int m_line;
 };
 };  // namespace popl
 template <>
@@ -32,7 +34,8 @@ struct std::formatter<popl::Token> : std::formatter<std::string_view> {
     auto format(const popl::Token& token, format_context& ctx) const {
         return std::formatter<std::string_view>::format(
             std::format("Token(type={}, lexeme=\"{}\", literal={}, line={})",
-                        token.type, token.lexeme, token.literal, token.line),
+                        token.m_type, token.m_lexeme, token.m_literal,
+                        token.m_line),
             ctx);
     }
 };
