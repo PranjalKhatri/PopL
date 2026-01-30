@@ -12,6 +12,12 @@ void Diagnostics::Error(unsigned int line, std::string_view message) {
     Report(line, "", message);
 }
 
+void Diagnostics::Error(Token token, std::string_view message) {
+    if (token.GetType() == TokenType::END_OF_FILE)
+        Report(token.GetLine(), " at end", message);
+    else
+        Report(token.GetLine(), " at '" + token.GetLexeme() + "'", message);
+}
 void Diagnostics::Report(unsigned int line, std::string_view where,
                          std::string_view message) {
     ms_had_error = true;
