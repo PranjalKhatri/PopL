@@ -1,12 +1,21 @@
 #include "popl/syntax/grammar/parser.hpp"
 
-#include <memory>
+#include <optional>
 
 #include "popl/lexer/token_types.hpp"
 #include "popl/literal.hpp"
 #include "popl/syntax/ast/expr.hpp"
 
 namespace popl {
+
+std::optional<Expr> Parser::Parse() {
+    try {
+        return Expression();
+    } catch (const ParseError& parseError) {
+        return std::nullopt;
+    }
+}
+
 Token Parser::Advance() {
     if (!IsAtEnd()) m_current++;
     return Previous();
@@ -19,6 +28,28 @@ bool Parser::Match(std::initializer_list<TokenType> tokenTypes) {
         }
     }
     return false;
+}
+
+void Parser::Synchronize() {
+    Advance();
+    while (!IsAtEnd()) {
+        if (Previous().GetType() == TokenType::SEMICOLON) return;
+
+        switch (Peek().GetType()) {
+            case TokenType::CLASS:
+            case TokenType::FUN:
+            case TokenType::VAR:
+            case TokenType::FOR:
+            case TokenType::IF:
+            case TokenType::WHILE:
+            case TokenType::PRINT:
+            case TokenType::RETURN:
+                return;
+            default:
+                break;
+        }
+        Advance();
+    }
 }
 
 Expr Parser::Expression() { return Equality(); }
@@ -57,5 +88,6 @@ Expr Parser::Primary() {
         Consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
         return Expr{GroupingExpr{MakeExprPtr(std::move(expr))}};
     }
+    throw Error(Peek(), "Expect expression");
 }
 };  // namespace popl

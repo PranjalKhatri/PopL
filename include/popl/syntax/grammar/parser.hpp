@@ -1,17 +1,23 @@
 #pragma once
 
 #include <initializer_list>
+#include <stdexcept>
 #include <vector>
 
+#include "popl/diagnostics.hpp"
 #include "popl/lexer/token.hpp"
 #include "popl/lexer/token_types.hpp"
 #include "popl/syntax/ast/expr.hpp"
 
 namespace popl {
-
+class ParseError : public std::runtime_error {
+   public:
+    ParseError() : runtime_error("Parser RunTime Error") {}
+};
 class Parser {
    public:
     Parser(std::vector<Token> tokens) : m_tokens{std::move(tokens)} {}
+    std::optional<Expr> Parse();
 
    private:
     // Checks current token type against given type
@@ -29,9 +35,19 @@ class Parser {
     // advances if it matches
     bool  Match(std::initializer_list<TokenType> tokenTypes);
 
+    Token Consume(TokenType type, const std::string& message) {
+        if (Check(type)) return Advance();
+        throw Error(Peek(), message);
+    }
+
     std::unique_ptr<Expr> MakeExprPtr(Expr&& e) const {
         return std::make_unique<Expr>(std::move(e));
     }
+    ParseError Error(Token token, const std::string& message) {
+        Diagnostics::Error(token, message);
+        return ParseError{};
+    }
+    void Synchronize();
 
     Expr Expression();
     Expr Equality();
