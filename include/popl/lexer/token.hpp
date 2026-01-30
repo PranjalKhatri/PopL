@@ -15,11 +15,11 @@ class Token {
           m_lexeme(std::move(lexeme)),
           m_literal(std::move(literal)),
           m_line(line) {}
-    TokenType   GetType() const { return m_type; }
-    std::string GetLexeme() const { return m_lexeme; }
-    PopLObject  GetLiteral() const { return m_literal; }
+    TokenType    GetType() const { return m_type; }
+    std::string  GetLexeme() const { return m_lexeme; }
+    PopLObject   GetLiteral() const { return m_literal; }
+    unsigned int GetLine() const { return m_line; }
 
-    friend std::ostream& operator<<(std::ostream& os, const Token& token);
     friend struct std::formatter<Token>;
 
    private:
