@@ -7,6 +7,8 @@
 
 #include "popl/diagnostics.hpp"
 #include "popl/lexer/lexer.hpp"
+#include "popl/syntax/grammar/parser.hpp"
+#include "popl/syntax/visitors/ast_printer.hpp"
 #include "popl/utils.hpp"
 
 namespace popl {
@@ -55,5 +57,9 @@ void Driver::Run(std::string source) {
     for (const auto& token : tokens) {
         std::println("{}", token);
     }
+    Parser parser{tokens};
+    auto   expression = parser.Parse();
+    if (Diagnostics::HadError() || !expression) return;
+    std::println("{}", AstPrinter{}.Print(expression.value()));
 }
 };  // namespace popl
