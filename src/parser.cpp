@@ -52,7 +52,24 @@ void Parser::Synchronize() {
     }
 }
 
-Expr Parser::Expression() { return Equality(); }
+Expr Parser::Expression() { return Comma(); }
+Expr Parser::Comma() {
+    return ParseBinary(&Parser::Ternary, {TokenType::COMMA});
+}
+Expr Parser::Ternary() {
+    Expr expr = Equality();
+    if (Match({TokenType::QUESTION})) {
+        Token question = Previous();
+        Expr  middle   = Expression();
+        Token colon =
+            Consume(TokenType::COLON, "No matching ':' for '?' found");
+        Expr right = Ternary();
+        expr.node.emplace<TernaryExpr>(MakeExprPtr(std::move(expr)), question,
+                                       MakeExprPtr(std::move(middle)), colon,
+                                       MakeExprPtr(std::move(right)));
+    }
+    return expr;
+}
 Expr Parser::Equality() {
     return ParseBinary(&Parser::Comparison,
                        {TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL});

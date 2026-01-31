@@ -50,6 +50,8 @@ class Parser {
     void Synchronize();
 
     Expr Expression();
+    Expr Comma();
+    Expr Ternary();
     Expr Equality();
     Expr Comparison();
     Expr Term();
