@@ -29,9 +29,17 @@ struct UnaryExpr {
     std::unique_ptr<Expr> right;
 };
 
+struct TernaryExpr {
+    std::unique_ptr<Expr> left;
+    Token                 opa;
+    std::unique_ptr<Expr> mid;
+    Token                 opb;
+    std::unique_ptr<Expr> right;
+};
+
 struct Expr {
-    using Variant =
-        std::variant<BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr>;
+    using Variant = std::variant<BinaryExpr, GroupingExpr, LiteralExpr,
+                                 UnaryExpr, TernaryExpr>;
 
     Variant node;
 };
