@@ -5,6 +5,7 @@ add_executable(PopL
                 utils.cpp
                 lexer.cpp
                 parser.cpp
+                interpreter.cpp
 )
 
 target_include_directories(PopL
