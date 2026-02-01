@@ -3,6 +3,8 @@
 #include <string>
 #include <string_view>
 
+#include "popl/syntax/visitors/interpreter.hpp"
+
 namespace popl {
 
 class Driver {
@@ -14,6 +16,9 @@ class Driver {
     int  RunRepl();
     int  RunFile(std::string_view path);
     void PrintUsage() const;
+
+   private:
+    static Interpreter interpreter;
 };
 
 }  // namespace popl
