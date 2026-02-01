@@ -1,5 +1,6 @@
 #include "popl/driver.hpp"
 
+#include <cstdlib>
 #include <iostream>
 #include <print>
 #include <string>
@@ -8,12 +9,11 @@
 #include "popl/diagnostics.hpp"
 #include "popl/lexer/lexer.hpp"
 #include "popl/syntax/grammar/parser.hpp"
-#include "popl/syntax/visitors/ast_printer.hpp"
 #include "popl/utils.hpp"
 
 namespace popl {
-
-int Driver::Init(int argc, char** argv) {
+Interpreter Driver::interpreter{};
+int         Driver::Init(int argc, char** argv) {
     if (argc > 2) {
         PrintUsage();
         return 64;
@@ -42,9 +42,8 @@ int Driver::RunRepl() {
 int Driver::RunFile(std::string_view path) {
     try {
         Run(utils::ReadFile(path));
-        if (Diagnostics::HadError()) {
-            return 65;
-        }
+        if (Diagnostics::HadError()) std::exit(65);
+        if (Diagnostics::HadRunTimeError()) std::exit(70);
     } catch (const std::runtime_error& e) {
         std::print("Error: {}\n", e.what());
     }
@@ -60,6 +59,7 @@ void Driver::Run(std::string source) {
     Parser parser{tokens};
     auto   expression = parser.Parse();
     if (Diagnostics::HadError() || !expression) return;
-    std::println("{}", AstPrinter{}.Print(expression.value()));
+    interpreter.Interpret(std::move(expression.value()));
+    // std::println("{}", AstPrinter{}.Print(expression.value()));
 }
 };  // namespace popl
