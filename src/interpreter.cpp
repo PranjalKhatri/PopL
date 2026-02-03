@@ -39,6 +39,8 @@ PopLObject Interpreter::operator()(const BinaryExpr& expr) const {
                 return PopLObject{left.asNumber() + right.asNumber()};
             if (left.isString() && right.isString())
                 return PopLObject{left.asString() + right.asString()};
+            if (left.isString() || right.isString())
+                return PopLObject{left.toString() + right.toString()};
             throw RunTimeError(expr.op,
                                "Operands must be two numbers or two strings.");
             break;
@@ -47,6 +49,8 @@ PopLObject Interpreter::operator()(const BinaryExpr& expr) const {
             return PopLObject{left.asNumber() - right.asNumber()};
         case TokenType::SLASH:
             CheckNumberOperand(expr.op, left, right);
+            if (right.asNumber() == 0.0)
+                throw RunTimeError(expr.op, "Division by zero!");
             return PopLObject{left.asNumber() / right.asNumber()};
         case TokenType::STAR:
             CheckNumberOperand(expr.op, left, right);
