@@ -48,9 +48,12 @@ class PopLObject {
                     return "nil";
                 else if constexpr (std::is_same_v<T, bool>)
                     return v ? "true" : "false";
-                else if constexpr (std::is_same_v<T, double>)
-                    return std::to_string(v);
-                else
+                else if constexpr (std::is_same_v<T, double>) {
+                    std::string s = std::to_string(v);
+                    s.erase(s.find_last_not_of('0') + 1);
+                    if (s.back() == '.') s.pop_back();
+                    return s;
+                } else
                     return v;
             },
             m_data);
