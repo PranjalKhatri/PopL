@@ -3,11 +3,14 @@
 #include <memory>
 #include <variant>
 
+#include "popl/lexer/token.hpp"
 #include "popl/syntax/ast/expr.hpp"
 
 namespace popl {
 
 struct Stmt;
+
+struct NilStmt {};
 
 struct ExpressionStmt {
     std::unique_ptr<Expr> expression;
@@ -17,8 +20,13 @@ struct PrintStmt {
     std::unique_ptr<Expr> expression;
 };
 
+struct VarStmt {
+    Token                 name;
+    std::unique_ptr<Expr> initializer;
+};
+
 struct Stmt {
-    using Variant = std::variant<ExpressionStmt, PrintStmt>;
+    using Variant = std::variant<NilStmt, ExpressionStmt, PrintStmt, VarStmt>;
 
     Variant node;
 };
