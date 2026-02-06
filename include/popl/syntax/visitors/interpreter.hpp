@@ -6,19 +6,33 @@
 #include "popl/literal.hpp"
 #include "popl/syntax/Exceptions/run_time_error.hpp"
 #include "popl/syntax/ast/expr.hpp"
+#include "popl/syntax/ast/stmt.hpp"
 
 namespace popl {
 
 struct Interpreter {
-    void Interpret(const Expr expression) {
+    void Interpret(const std::vector<Stmt>& statements) const {
         try {
-            PopLObject value = Evaluate(expression);
-            std::println("{}", value.toString());
+            for (const auto& statement : statements) {
+                Execute(statement);
+            }
         } catch (const RunTimeError& error) {
             Diagnostics::ReportRunTimeError(error);
         }
     }
-
+    /*
+     * Statement visitor
+     */
+    void operator()(const ExpressionStmt& stmt) const {
+        Evaluate(*(stmt.expression));
+    }
+    void operator()(const PrintStmt& stmt) const {
+        PopLObject value = Evaluate(*(stmt.expression));
+        println("{}", value.toString());
+    }
+    /*
+     * Expresssoin visitor
+     */
     PopLObject operator()(const LiteralExpr& expr) const { return expr.value; }
 
     PopLObject operator()(const GroupingExpr& expr) const {
@@ -37,6 +51,8 @@ struct Interpreter {
     PopLObject Evaluate(const Expr& expr) const {
         return visitExpr(expr, *this);
     }
+    void Execute(const Stmt& stmt) const { visitStmt(stmt, *this); }
+
     void CheckNumberOperand(const Token& op, const PopLObject& operand) const {
         if (operand.isNumber()) return;
         throw RunTimeError(op, "Operand must be a number.");
