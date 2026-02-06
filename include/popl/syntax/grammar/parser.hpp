@@ -7,8 +7,8 @@
 #include "popl/diagnostics.hpp"
 #include "popl/lexer/token.hpp"
 #include "popl/lexer/token_types.hpp"
-#include "popl/syntax/ast/Stmt.hpp"
 #include "popl/syntax/ast/expr.hpp"
+#include "popl/syntax/ast/stmt.hpp"
 
 namespace popl {
 class ParseError : public std::runtime_error {
