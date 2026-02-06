@@ -39,9 +39,13 @@ struct TernaryExpr {
     std::unique_ptr<Expr> right;
 };
 
+struct VariableExpr {
+    Token name;
+};
+
 struct Expr {
     using Variant = std::variant<NilExpr, BinaryExpr, GroupingExpr, LiteralExpr,
-                                 UnaryExpr, TernaryExpr>;
+                                 UnaryExpr, TernaryExpr, VariableExpr>;
 
     Variant node;
 };
