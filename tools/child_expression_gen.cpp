@@ -12,26 +12,41 @@ static std::string trim(const std::string& s) {
     return s.substr(start, end - start + 1);
 }
 
-static std::string rewriteType(const std::string& type) {
-    if (type == "Expr" || type == "Expr*") {
-        return "std::unique_ptr<Expr>";
+static std::string rewriteType(const std::string& type,
+                               const std::string& exprBaseName) {
+    // Check if type ends with '*' marker for unique_ptr
+    if (!type.empty() && type.back() == '*') {
+        std::string cleanType = type.substr(0, type.length() - 1);
+        return "std::unique_ptr<" + cleanType + ">";
     }
+
     return type;
 }
 
-static void defineVisitor(std::ofstream&                  out,
+static void defineVisitor(std::ofstream& out, const std::string& exprBaseName,
                           const std::vector<std::string>& types) {
-    out << "struct ExprVisitor {\n";
-    out << "    virtual ~ExprVisitor() = default;\n";
-    for (const auto& type : types) {
-        auto        colon     = type.find(':');
-        std::string className = trim(type.substr(0, colon));
-        out << "    virtual void operator()(" << className << "& expr) = 0;\n";
-    }
-    out << "};\n\n";
+    out << "\n";
+    out << "template <typename Visitor>\n";
+    out << "decltype(auto) visit" << exprBaseName << "(" << exprBaseName << "& "
+        << static_cast<char>(std::tolower(exprBaseName[0]))
+        << exprBaseName.substr(1) << ", Visitor&& visitor) {\n";
+    out << "    return std::visit(std::forward<Visitor>(visitor), "
+        << static_cast<char>(std::tolower(exprBaseName[0]))
+        << exprBaseName.substr(1) << ".node);\n";
+    out << "}\n\n";
+
+    out << "template <typename Visitor>\n";
+    out << "decltype(auto) visit" << exprBaseName << "(const " << exprBaseName
+        << "& " << static_cast<char>(std::tolower(exprBaseName[0]))
+        << exprBaseName.substr(1) << ", Visitor&& visitor) {\n";
+    out << "    return std::visit(std::forward<Visitor>(visitor), "
+        << static_cast<char>(std::tolower(exprBaseName[0]))
+        << exprBaseName.substr(1) << ".node);\n";
+    out << "}\n";
 }
 
-static void defineType(std::ofstream& out, const std::string& spec) {
+static void defineType(std::ofstream& out, const std::string& spec,
+                       const std::string& exprBaseName) {
     auto        colon     = spec.find(':');
     std::string className = trim(spec.substr(0, colon));
     std::string fields    = trim(spec.substr(colon + 1));
@@ -46,7 +61,7 @@ static void defineType(std::ofstream& out, const std::string& spec) {
                                                           : comma - start));
 
         auto        space = field.find_last_of(' ');
-        std::string type  = rewriteType(field.substr(0, space));
+        std::string type  = rewriteType(field.substr(0, space), exprBaseName);
         std::string name  = field.substr(space + 1);
 
         out << "    " << type << " " << name << ";\n";
@@ -59,8 +74,9 @@ static void defineType(std::ofstream& out, const std::string& spec) {
 }
 
 static void defineExprWrapper(std::ofstream&                  out,
+                              const std::string&              exprBaseName,
                               const std::vector<std::string>& types) {
-    out << "struct Expr {\n";
+    out << "struct " << exprBaseName << " {\n";
     out << "    using Variant = std::variant<";
 
     for (size_t i = 0; i < types.size(); ++i) {
@@ -75,16 +91,10 @@ static void defineExprWrapper(std::ofstream&                  out,
     out << "};\n\n";
 }
 
-static void defineVisitHelper(std::ofstream& out) {
-    out << "inline void visitExpr(Expr& expr, ExprVisitor& visitor) {\n";
-    out << "    std::visit(visitor, expr);\n";
-    out << "}\n\n";
-}
-
 // ---------------- Main Generator ----------------
-void DefineExprAst(const std::string&              outputDir,
-                   const std::vector<std::string>& types) {
-    std::string   path = outputDir + "/Expr.hpp";
+void DefineAst(const std::string& exprBaseName, const std::string& outputDir,
+               const std::vector<std::string>& types) {
+    std::string   path = outputDir + "/" + exprBaseName + ".hpp";
     std::ofstream out(path);
 
     if (!out.is_open()) {
@@ -101,32 +111,46 @@ void DefineExprAst(const std::string&              outputDir,
     out << "namespace popl {\n\n";
 
     // forward declaration for unique_ptr
-    out << "struct Expr;\n\n";
+    out << "struct " << exprBaseName << ";\n\n";
 
     for (const auto& type : types) {
-        defineType(out, type);
+        defineType(out, type, exprBaseName);
     }
 
-    defineExprWrapper(out, types);
-    defineVisitor(out, types);
-    defineVisitHelper(out);
+    defineExprWrapper(out, exprBaseName, types);
+    defineVisitor(out, exprBaseName, types);
 
     out << "} // namespace popl\n";
 }
-
-// ---------------- Entrypoint ----------------
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cout << "Usage: expr_gen <output_directory>\n";
+        std::cout << "Usage: ast_gen  <output_directory>\n";
+        std::cout << "Example: ast_gen ./generated\n";
+        std::cout << "         ast_gen ./generated\n";
         return 64;
     }
 
-    std::vector<std::string> types = {
-        "BinaryExpr   : Expr left, Token op, Expr right",
-        "GroupingExpr : Expr expression",
-        "LiteralExpr  : PopLObject value",
-        "UnaryExpr    : Token op, Expr right",
+    std::string exprBaseName{"Expr"};
+    std::string outputDir = argv[1];
+
+    std::vector<std::string> ExprTypes = {
+        "Binary" + exprBaseName + "   : " + exprBaseName +
+            "* left, Token op, " + exprBaseName + "* right",
+        "Ternary" + exprBaseName + "  : " + exprBaseName +
+            "* condition, Token question, " + exprBaseName +
+            "* thenBranch, Token colon, " + exprBaseName + "* elseBranch",
+        "Comma" + exprBaseName + "    : " + exprBaseName +
+            "* left, Token comma, " + exprBaseName + "* right",
+        "Grouping" + exprBaseName + " : " + exprBaseName + "* expression",
+        "Literal" + exprBaseName + "  : PopLObject value",
+        "Unary" + exprBaseName + "    : Token op, " + exprBaseName + "* right",
     };
 
-    DefineExprAst(argv[1], types);
+    std::string              stmtBaseName{"Stmt"};
+    std::vector<std::string> StmtTypes = {
+        "Expression" + stmtBaseName + " : Expr* expression",
+        "Print" + stmtBaseName + ": Expr* expression"};
+
+    DefineAst(exprBaseName, outputDir, ExprTypes);
+    DefineAst(stmtBaseName, outputDir, StmtTypes);
 }
