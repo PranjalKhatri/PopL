@@ -1,6 +1,8 @@
 #include "popl/syntax/grammar/parser.hpp"
 
+#include <memory>
 #include <optional>
+#include <variant>
 #include <vector>
 
 #include "popl/lexer/token_types.hpp"
@@ -11,8 +13,37 @@ namespace popl {
 
 std::vector<Stmt> Parser::Parse() {
     std::vector<Stmt> statements{};
-    while (!IsAtEnd()) statements.emplace_back(Statement());
+    while (!IsAtEnd()) statements.emplace_back(Declaration());
     return statements;
+}
+Stmt Parser::Declaration() {
+    try {
+        if (Match({TokenType::VAR})) return VarDeclaration();
+        return Statement();
+    } catch (const ParseError& error) {
+        Synchronize();
+        return Stmt{NilStmt()};
+    }
+}
+
+Stmt Parser::VarDeclaration() {
+    Token name = Consume(TokenType::IDENTIFIER, "Expect variable name.");
+
+    Expr initializer{NilExpr{}};
+    if (Match({TokenType::EQUAL})) {
+        Expr rhs = Expression();
+        if (!std::holds_alternative<NilExpr>(rhs.node)) {
+            std::visit(
+                [&](auto&& node) {
+                    using T = std::decay_t<decltype(node)>;
+                    initializer.node.emplace<T>(std::move(node));
+                },
+                rhs.node);
+        }
+    }
+
+    Consume(TokenType::SEMICOLON, "Expect ';' after variable declaration.");
+    return Stmt{VarStmt{name, std::make_unique<Expr>(std::move(initializer))}};
 }
 
 Stmt Parser::Statement() {
@@ -113,6 +144,10 @@ Expr Parser::Primary() {
 
     if (Match({TokenType::NUMBER, TokenType::STRING})) {
         return Expr{LiteralExpr(Previous().GetLiteral())};
+    }
+
+    if (Match({TokenType::IDENTIFIER})) {
+        return Expr{VariableExpr{Previous()}};
     }
 
     if (Match({TokenType::LEFT_PAREN})) {

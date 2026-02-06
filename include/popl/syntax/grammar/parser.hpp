@@ -51,6 +51,8 @@ class Parser {
     void Synchronize();
 
     Stmt Statement();
+    Stmt Declaration();
+    Stmt VarDeclaration();
     Stmt PrintStatement();
     Stmt ExpressionStatement();
     Expr Expression();
