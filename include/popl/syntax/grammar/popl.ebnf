@@ -11,6 +11,13 @@ binary         → expression operator expression ;
 operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
                | "+"  | "-"  | "*" | "/" ;
 
+---------------------------------------------------------------------------
+program        -> statement* EOF ;
+
+statement      -> exprStatement | printStatement ;
+
+exprStatement  -> expression ";" ;
+printStatement -> "print" expression ";" ;
 
 expression     -> comma ;
 comma          -> ternary ( "," ternary )* ;
