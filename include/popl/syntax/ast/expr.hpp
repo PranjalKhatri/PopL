@@ -10,6 +10,8 @@ namespace popl {
 
 struct Expr;
 
+struct NilExpr {};
+
 struct BinaryExpr {
     std::unique_ptr<Expr> left;
     Token                 op;
@@ -38,7 +40,7 @@ struct TernaryExpr {
 };
 
 struct Expr {
-    using Variant = std::variant<BinaryExpr, GroupingExpr, LiteralExpr,
+    using Variant = std::variant<NilExpr, BinaryExpr, GroupingExpr, LiteralExpr,
                                  UnaryExpr, TernaryExpr>;
 
     Variant node;
