@@ -23,6 +23,10 @@ static std::string rewriteType(const std::string& type,
     return type;
 }
 
+static void defineNilType(std::ofstream& out, const std::string& exprBaseName) {
+    out << "struct Nil" << exprBaseName << " {};\n\n";
+}
+
 static void defineVisitor(std::ofstream& out, const std::string& exprBaseName,
                           const std::vector<std::string>& types) {
     out << "\n";
@@ -78,7 +82,8 @@ static void defineExprWrapper(std::ofstream&                  out,
                               const std::vector<std::string>& types) {
     out << "struct " << exprBaseName << " {\n";
     out << "    using Variant = std::variant<";
-
+    out << "Nil" << exprBaseName;
+    if (types.size()) out << ", ";
     for (size_t i = 0; i < types.size(); ++i) {
         auto colon     = types[i].find(':');
         auto className = trim(types[i].substr(0, colon));
@@ -112,7 +117,7 @@ void DefineAst(const std::string& exprBaseName, const std::string& outputDir,
 
     // forward declaration for unique_ptr
     out << "struct " << exprBaseName << ";\n\n";
-
+    defineNilType(out, exprBaseName);
     for (const auto& type : types) {
         defineType(out, type, exprBaseName);
     }
@@ -144,12 +149,15 @@ int main(int argc, char** argv) {
         "Grouping" + exprBaseName + " : " + exprBaseName + "* expression",
         "Literal" + exprBaseName + "  : PopLObject value",
         "Unary" + exprBaseName + "    : Token op, " + exprBaseName + "* right",
-    };
+        "Variable" + exprBaseName + "    : Token name"};
 
     std::string              stmtBaseName{"Stmt"};
     std::vector<std::string> StmtTypes = {
         "Expression" + stmtBaseName + " : Expr* expression",
-        "Print" + stmtBaseName + ": Expr* expression"};
+        "Print" + stmtBaseName + ": Expr* expression",
+        "Var" + stmtBaseName + ": Token name, Expr* initializer"
+
+    };
 
     DefineAst(exprBaseName, outputDir, ExprTypes);
     DefineAst(stmtBaseName, outputDir, StmtTypes);
