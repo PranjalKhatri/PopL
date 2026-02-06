@@ -51,15 +51,12 @@ int Driver::RunFile(std::string_view path) {
 }
 
 void Driver::Run(std::string source) {
-    Lexer lexer{std::move(source)};
-    auto  tokens{lexer.ScanTokens()};
-    for (const auto& token : tokens) {
-        std::println("{}", token);
-    }
+    Lexer  lexer{std::move(source)};
+    auto   tokens{lexer.ScanTokens()};
     Parser parser{tokens};
-    auto   expression = parser.Parse();
-    if (Diagnostics::HadError() || !expression) return;
-    interpreter.Interpret(std::move(expression.value()));
+    auto   statements = parser.Parse();
+    if (Diagnostics::HadError()) return;
+    interpreter.Interpret(statements);
     // std::println("{}", AstPrinter{}.Print(expression.value()));
 }
 };  // namespace popl
