@@ -1,6 +1,7 @@
 #include "popl/syntax/grammar/parser.hpp"
 
 #include <optional>
+#include <vector>
 
 #include "popl/lexer/token_types.hpp"
 #include "popl/literal.hpp"
@@ -8,14 +9,28 @@
 
 namespace popl {
 
-std::optional<Expr> Parser::Parse() {
-    try {
-        return Expression();
-    } catch (const ParseError& parseError) {
-        return std::nullopt;
-    }
+std::vector<Stmt> Parser::Parse() {
+    std::vector<Stmt> statements{};
+    while (!IsAtEnd()) statements.emplace_back(Statement());
+    return statements;
 }
 
+Stmt Parser::Statement() {
+    if (Match({TokenType::PRINT})) return PrintStatement();
+    return ExpressionStatement();
+}
+
+Stmt Parser::PrintStatement() {
+    auto value = std::make_unique<Expr>(Expression());
+    Consume(TokenType::SEMICOLON, "Expect ; after value.");
+    return Stmt{PrintStmt{std::move(value)}};
+}
+
+Stmt Parser::ExpressionStatement() {
+    auto expr = std::make_unique<Expr>(Expression());
+    Consume(TokenType::SEMICOLON, "Expect ; after value.");
+    return Stmt{ExpressionStmt{std::move(expr)}};
+}
 Token Parser::Advance() {
     if (!IsAtEnd()) m_current++;
     return Previous();

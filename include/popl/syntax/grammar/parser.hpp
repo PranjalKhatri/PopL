@@ -7,6 +7,7 @@
 #include "popl/diagnostics.hpp"
 #include "popl/lexer/token.hpp"
 #include "popl/lexer/token_types.hpp"
+#include "popl/syntax/ast/Stmt.hpp"
 #include "popl/syntax/ast/expr.hpp"
 
 namespace popl {
@@ -17,7 +18,7 @@ class ParseError : public std::runtime_error {
 class Parser {
    public:
     Parser(std::vector<Token> tokens) : m_tokens{std::move(tokens)} {}
-    std::optional<Expr> Parse();
+    std::vector<Stmt> Parse();
 
    private:
     // Checks current token type against given type
@@ -49,6 +50,9 @@ class Parser {
     }
     void Synchronize();
 
+    Stmt Statement();
+    Stmt PrintStatement();
+    Stmt ExpressionStatement();
     Expr Expression();
     Expr Comma();
     Expr Ternary();
