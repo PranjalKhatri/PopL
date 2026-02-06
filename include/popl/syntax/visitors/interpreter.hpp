@@ -30,6 +30,10 @@ struct Interpreter {
         PopLObject value = Evaluate(*(stmt.expression));
         println("{}", value.toString());
     }
+    void operator()(const NilStmt& stmt) const {
+        assert(false && "Nil statment not defined");
+    }
+    void       operator()(const VarStmt& stmt) const {}
     /*
      * Expresssoin visitor
      */
@@ -46,6 +50,7 @@ struct Interpreter {
     }
     PopLObject operator()(const UnaryExpr& expr) const;
     PopLObject operator()(const BinaryExpr& expr) const;
+    PopLObject operator()(const NilExpr& expr) const { return PopLObject{}; }
 
    private:
     PopLObject Evaluate(const Expr& expr) const {
