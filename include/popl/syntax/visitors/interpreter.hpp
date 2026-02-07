@@ -1,8 +1,10 @@
 #pragma once
 
 #include <print>
+#include <variant>
 
 #include "popl/diagnostics.hpp"
+#include "popl/environment.hpp"
 #include "popl/literal.hpp"
 #include "popl/syntax/Exceptions/run_time_error.hpp"
 #include "popl/syntax/ast/expr.hpp"
@@ -10,8 +12,9 @@
 
 namespace popl {
 
-struct Interpreter {
-    void Interpret(const std::vector<Stmt>& statements) const {
+class Interpreter {
+   public:
+    void Interpret(const std::vector<Stmt>& statements) {
         try {
             for (const auto& statement : statements) {
                 Execute(statement);
@@ -23,17 +26,22 @@ struct Interpreter {
     /*
      * Statement visitor
      */
-    void operator()(const ExpressionStmt& stmt) const {
+    void operator()(const ExpressionStmt& stmt) {
         Evaluate(*(stmt.expression));
     }
-    void operator()(const PrintStmt& stmt) const {
+    void operator()(const PrintStmt& stmt) {
         PopLObject value = Evaluate(*(stmt.expression));
         println("{}", value.toString());
     }
-    void operator()(const NilStmt& stmt) const {
+    void operator()(const NilStmt& stmt) {
         assert(false && "Nil statment not defined");
     }
-    void       operator()(const VarStmt& stmt) const {}
+    void operator()(const VarStmt& stmt) {
+        PopLObject value{};
+        if (!std::holds_alternative<NilExpr>(stmt.initializer->node))
+            value = Evaluate(*(stmt.initializer));
+        environment.Define(stmt.name.GetLexeme(), value);
+    }
     /*
      * Expresssoin visitor
      */
@@ -44,19 +52,22 @@ struct Interpreter {
     }
 
     PopLObject operator()(const TernaryExpr& expr) const {
-        PopLObject left = Evaluate(*expr.right);
+        PopLObject left = Evaluate(*expr.left);
         if (left.isTruthy()) return Evaluate(*expr.mid);
         return Evaluate(*expr.right);
     }
     PopLObject operator()(const UnaryExpr& expr) const;
     PopLObject operator()(const BinaryExpr& expr) const;
+    PopLObject operator()(const VariableExpr& expr) const {
+        return environment.Get(expr.name);
+    }
     PopLObject operator()(const NilExpr& expr) const { return PopLObject{}; }
 
    private:
     PopLObject Evaluate(const Expr& expr) const {
         return visitExpr(expr, *this);
     }
-    void Execute(const Stmt& stmt) const { visitStmt(stmt, *this); }
+    void Execute(const Stmt& stmt) { visitStmt(stmt, *this); }
 
     void CheckNumberOperand(const Token& op, const PopLObject& operand) const {
         if (operand.isNumber()) return;
@@ -67,5 +78,8 @@ struct Interpreter {
         if (left.isNumber() && right.isNumber()) return;
         throw RunTimeError(op, "Operands must be number");
     }
+
+   private:
+    Environment environment{};
 };
 };  // namespace popl
