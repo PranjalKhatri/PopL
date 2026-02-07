@@ -50,7 +50,7 @@ void Lexer::ScanNumberLiteral() {
 }
 void Lexer::ScanIdentifier() {
     while (IsAlphaNumOrUnderScore(Peek())) Advance();
-    std::string_view text{m_source.data(), GetCurrentLiteralLength()};
+    std::string_view text{GetCurrentLiteralView()};
 
     TokenType type = popl::KeywordOrIdentifier(text);
     AddToken(type);
