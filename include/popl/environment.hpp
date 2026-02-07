@@ -1,8 +1,4 @@
 #pragma once
-
-#include <map>
-#include <string>
-
 #include "popl/lexer/token.hpp"
 #include "popl/literal.hpp"
 #include "popl/syntax/Exceptions/run_time_error.hpp"
@@ -10,16 +6,25 @@
 namespace popl {
 class Environment {
    public:
+    const PopLObject& Get(const Token& name) const { return Lookup(name); }
+
+    PopLObject& GetMutable(const Token& name) { return Lookup(name); }
+
     void Define(std::string name, PopLObject value) {
         values.insert_or_assign(std::move(name), std::move(value));
     }
 
-    PopLObject& Get(const Token& name) {
+   private:
+    PopLObject& Lookup(const Token& name) {
         auto it = values.find(name.GetLexeme());
         if (it != values.end()) return it->second;
 
         throw RunTimeError(name,
                            "Undefined variable '" + name.GetLexeme() + "'.");
+    }
+
+    const PopLObject& Lookup(const Token& name) const {
+        return const_cast<Environment*>(this)->Lookup(name);
     }
 
    private:
