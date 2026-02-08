@@ -10,8 +10,12 @@ class Environment {
 
     PopLObject& GetMutable(const Token& name) { return Lookup(name); }
 
-    void Define(std::string name, PopLObject value) {
-        values.insert_or_assign(std::move(name), std::move(value));
+    void Define(const Token& name, PopLObject value) {
+        values.insert_or_assign(name.GetLexeme(), std::move(value));
+    }
+    void Assign(const Token& name, PopLObject value) {
+        PopLObject& obj = Lookup(name);
+        obj             = std::move(value);
     }
 
    private:
