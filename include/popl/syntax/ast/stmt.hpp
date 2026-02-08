@@ -25,8 +25,14 @@ struct VarStmt {
     std::unique_ptr<Expr> initializer;
 };
 
+struct AssignStmt {
+    Token                 name;
+    std::unique_ptr<Expr> value;
+};
+
 struct Stmt {
-    using Variant = std::variant<NilStmt, ExpressionStmt, PrintStmt, VarStmt>;
+    using Variant =
+        std::variant<NilStmt, ExpressionStmt, PrintStmt, VarStmt, AssignStmt>;
 
     Variant node;
 };
