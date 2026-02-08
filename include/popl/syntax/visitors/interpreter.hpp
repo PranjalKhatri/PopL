@@ -40,7 +40,11 @@ class Interpreter {
         PopLObject value{};
         if (!std::holds_alternative<NilExpr>(stmt.initializer->node))
             value = Evaluate(*(stmt.initializer));
-        environment.Define(stmt.name.GetLexeme(), value);
+        environment.Define(stmt.name, value);
+    }
+    void operator()(const AssignStmt& stmt) {
+        PopLObject value{Evaluate(*(stmt.value))};
+        environment.Assign(stmt.name, value);
     }
     /*
      * Expresssoin visitor
@@ -52,9 +56,9 @@ class Interpreter {
     }
 
     PopLObject operator()(const TernaryExpr& expr) const {
-        PopLObject left = Evaluate(*expr.left);
-        if (left.isTruthy()) return Evaluate(*expr.mid);
-        return Evaluate(*expr.right);
+        PopLObject left = Evaluate(*expr.condition);
+        if (left.isTruthy()) return Evaluate(*expr.thenBranch);
+        return Evaluate(*expr.elseBranch);
     }
     PopLObject operator()(const UnaryExpr& expr) const;
     PopLObject operator()(const BinaryExpr& expr) const;
