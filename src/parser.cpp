@@ -60,9 +60,10 @@ Stmt Parser::PrintStatement() {
 }
 
 Stmt Parser::AssignmentStatement() {
-    Token name = Consume(TokenType::IDENTIFIER, "Expects an Identifier.");
+    Token name = Previous();
     Consume(TokenType::EQUAL, "Expects = after an identifier name");
     auto value{std::make_unique<Expr>(Expression())};
+    Consume(TokenType::SEMICOLON, "Expects ; after Assignments.");
     return Stmt{AssignStmt{std::move(name), std::move(value)}};
 }
 
