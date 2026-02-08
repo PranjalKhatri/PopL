@@ -48,6 +48,8 @@ Stmt Parser::VarDeclaration() {
 
 Stmt Parser::Statement() {
     if (Match({TokenType::PRINT})) return PrintStatement();
+    if (Match({TokenType::IDENTIFIER}) && Peek().GetType() == TokenType::EQUAL)
+        return AssignmentStatement();
     return ExpressionStatement();
 }
 
@@ -57,15 +59,19 @@ Stmt Parser::PrintStatement() {
     return Stmt{PrintStmt{std::move(value)}};
 }
 
+Stmt Parser::AssignmentStatement() {
+    Token name = Consume(TokenType::IDENTIFIER, "Expects an Identifier.");
+    Consume(TokenType::EQUAL, "Expects = after an identifier name");
+    auto value{std::make_unique<Expr>(Expression())};
+    return Stmt{AssignStmt{std::move(name), std::move(value)}};
+}
+
 Stmt Parser::ExpressionStatement() {
     auto expr = std::make_unique<Expr>(Expression());
     Consume(TokenType::SEMICOLON, "Expect ; after value.");
     return Stmt{ExpressionStmt{std::move(expr)}};
 }
-Token Parser::Advance() {
-    if (!IsAtEnd()) m_current++;
-    return Previous();
-}
+
 bool Parser::Match(std::initializer_list<TokenType> tokenTypes) {
     for (const auto& tokenType : tokenTypes) {
         if (Check(tokenType)) {

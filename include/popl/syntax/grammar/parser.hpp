@@ -31,10 +31,14 @@ class Parser {
     Token Peek() const { return m_tokens.at(m_current); }
     Token Previous() const { return m_tokens.at(m_current - 1); };
 
-    Token Advance();
+    Token Advance() {
+        if (!IsAtEnd()) m_current++;
+        return Previous();
+    }
+
     // returns whether the current token type matches any of the given types and
     // advances if it matches
-    bool  Match(std::initializer_list<TokenType> tokenTypes);
+    bool Match(std::initializer_list<TokenType> tokenTypes);
 
     Token Consume(TokenType type, const std::string& message) {
         if (Check(type)) return Advance();
@@ -55,6 +59,7 @@ class Parser {
     Stmt VarDeclaration();
     Stmt PrintStatement();
     Stmt ExpressionStatement();
+    Stmt AssignmentStatement();
     Expr Expression();
     Expr Comma();
     Expr Ternary();
