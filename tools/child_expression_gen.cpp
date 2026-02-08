@@ -144,8 +144,6 @@ int main(int argc, char** argv) {
         "Ternary" + exprBaseName + "  : " + exprBaseName +
             "* condition, Token question, " + exprBaseName +
             "* thenBranch, Token colon, " + exprBaseName + "* elseBranch",
-        "Comma" + exprBaseName + "    : " + exprBaseName +
-            "* left, Token comma, " + exprBaseName + "* right",
         "Grouping" + exprBaseName + " : " + exprBaseName + "* expression",
         "Literal" + exprBaseName + "  : PopLObject value",
         "Unary" + exprBaseName + "    : Token op, " + exprBaseName + "* right",
@@ -155,9 +153,8 @@ int main(int argc, char** argv) {
     std::vector<std::string> StmtTypes = {
         "Expression" + stmtBaseName + " : Expr* expression",
         "Print" + stmtBaseName + ": Expr* expression",
-        "Var" + stmtBaseName + ": Token name, Expr* initializer"
-
-    };
+        "Var" + stmtBaseName + ": Token name, Expr* initializer",
+        "Assign" + stmtBaseName + ": Token name, " + exprBaseName + "* value"};
 
     DefineAst(exprBaseName, outputDir, ExprTypes);
     DefineAst(stmtBaseName, outputDir, StmtTypes);
