@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <optional>
+#include <print>
 #include <variant>
 #include <vector>
 
@@ -48,7 +49,8 @@ Stmt Parser::VarDeclaration() {
 
 Stmt Parser::Statement() {
     if (Match({TokenType::PRINT})) return PrintStatement();
-    if (Match({TokenType::IDENTIFIER}) && Peek().GetType() == TokenType::EQUAL)
+    if (!IsAtEnd() && PeekNext().GetType() == TokenType::EQUAL &&
+        Match({TokenType::IDENTIFIER}))
         return AssignmentStatement();
     if (Match({TokenType::LEFT_BRACE}))
         return Stmt{BlockStmt{BlockStatement()}};
