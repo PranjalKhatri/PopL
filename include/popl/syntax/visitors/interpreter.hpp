@@ -64,6 +64,9 @@ class Interpreter {
         else
             Execute(*stmt.elseBranch);
     }
+    void operator()(const WhileStmt& stmt) {
+        while (Evaluate(*stmt.condition).isTruthy()) Execute(*stmt.body);
+    }
     /*
      * Expression visitor
      */
