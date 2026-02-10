@@ -42,7 +42,7 @@ class Interpreter {
         println("{}", value.toString());
     }
     void operator()(const NilStmt& stmt) {
-        assert(false && "Nil statment not defined");
+        // Yeah.. do nothing
     }
     void operator()(const VarStmt& stmt) {
         PopLObject value{};
@@ -57,6 +57,12 @@ class Interpreter {
     void operator()(const AssignStmt& stmt) {
         PopLObject value{Evaluate(*(stmt.value))};
         environment->Assign(stmt.name, value);
+    }
+    void operator()(const IfStmt& stmt) {
+        if (Evaluate(*stmt.condition).isTruthy())
+            Execute(*stmt.thenBranch);
+        else
+            Execute(*stmt.elseBranch);
     }
     /*
      * Expression visitor
