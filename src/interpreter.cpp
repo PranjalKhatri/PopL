@@ -3,6 +3,7 @@
 namespace popl {
 PopLObject Interpreter::operator()(const UnaryExpr& expr) const {
     PopLObject right = Evaluate(*expr.right);
+    CheckUninitialised(expr.op, right);
     switch (expr.op.GetType()) {
         case TokenType::MINUS:
             CheckNumberOperand(expr.op, right);
@@ -19,6 +20,10 @@ PopLObject Interpreter::operator()(const UnaryExpr& expr) const {
 PopLObject Interpreter::operator()(const BinaryExpr& expr) const {
     PopLObject left  = Evaluate(*expr.left);
     PopLObject right = Evaluate(*expr.right);
+
+    CheckUninitialised(expr.op, left);
+    CheckUninitialised(expr.op, right);
+
     switch (expr.op.GetType()) {
         case TokenType::EQUAL_EQUAL:
             return PopLObject{left == right};

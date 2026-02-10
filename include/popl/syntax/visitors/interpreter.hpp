@@ -31,10 +31,14 @@ class Interpreter {
      */
     void operator()(const ExpressionStmt& stmt) {
         PopLObject obj = Evaluate(*(stmt.expression));
-        if (m_repl_mode) std::println("{}", obj.toString());
+        if (m_repl_mode) {
+            CheckUninitialised(MakeReplReadToken(), obj);
+            std::println("{}", obj.toString());
+        }
     }
     void operator()(const PrintStmt& stmt) {
         PopLObject value = Evaluate(*(stmt.expression));
+        CheckUninitialised(MakeReplReadToken("Print"), value);
         println("{}", value.toString());
     }
     void operator()(const NilStmt& stmt) {
@@ -55,7 +59,7 @@ class Interpreter {
         environment->Assign(stmt.name, value);
     }
     /*
-     * Expresssoin visitor
+     * Expression visitor
      */
     PopLObject operator()(const LiteralExpr& expr) const { return expr.value; }
 
@@ -65,6 +69,7 @@ class Interpreter {
 
     PopLObject operator()(const TernaryExpr& expr) const {
         PopLObject left = Evaluate(*expr.condition);
+        CheckUninitialised(expr.question, left);
         if (left.isTruthy()) return Evaluate(*expr.thenBranch);
         return Evaluate(*expr.elseBranch);
     }
@@ -90,6 +95,10 @@ class Interpreter {
         if (left.isNumber() && right.isNumber()) return;
         throw RunTimeError(op, "Operands must be number");
     }
+    void CheckUninitialised(const Token& op, const PopLObject& value) const {
+        if (value.isUninitialized())
+            throw RunTimeError(op, "Use of Uninitialized value");
+    }
     void ExecuteBlock(const std::vector<Stmt>& stmts, Environment* newEnv) {
         Environment* previous = environment;
         try {
@@ -102,6 +111,10 @@ class Interpreter {
             throw;
         }
         environment = previous;
+    }
+
+    Token MakeReplReadToken(std::string_view what = "<repl>") const {
+        return Token{TokenType::IDENTIFIER, std::string(what), {}, 1};
     }
 
    private:
