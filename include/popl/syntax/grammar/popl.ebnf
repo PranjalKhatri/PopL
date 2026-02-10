@@ -16,12 +16,13 @@ program        -> declaration* EOF ;
 declaration    -> varDecl | statement ;
 
 varDecl        -> "var" IDENTIFIER ( "=" expression )? ";" ;
-statement      -> assignment | exprStatement | printStatement | block;
+statement      -> assignment | exprStatement | printStatement | block | ifStatement;
 
 assignment     -> IDENTIFIER "=" expression ";" ;
 exprStatement  -> expression ";" ;
 printStatement -> "print" expression ";" ;
 block          -> "{" declaration* "}" ;
+ifStatement    -> "if" "(" expression ")" statement ("else" statement)? ;
 
 expression     -> comma ;
 comma          -> ternary ( "," ternary )* ;
