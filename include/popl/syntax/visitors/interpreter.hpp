@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <print>
 #include <variant>
 
@@ -12,6 +13,7 @@
 
 namespace popl {
 
+// TODO: Reason about environment pointer
 class Interpreter {
    public:
     void Interpret(const std::vector<Stmt>& statements) {
@@ -40,11 +42,15 @@ class Interpreter {
         PopLObject value{};
         if (!std::holds_alternative<NilExpr>(stmt.initializer->node))
             value = Evaluate(*(stmt.initializer));
-        environment.Define(stmt.name, value);
+        environment->Define(stmt.name, value);
+    }
+    void operator()(const BlockStmt& stmt) {
+        Environment blockEnv(environment);
+        ExecuteBlock(stmt.statements, &blockEnv);
     }
     void operator()(const AssignStmt& stmt) {
         PopLObject value{Evaluate(*(stmt.value))};
-        environment.Assign(stmt.name, value);
+        environment->Assign(stmt.name, value);
     }
     /*
      * Expresssoin visitor
@@ -63,7 +69,7 @@ class Interpreter {
     PopLObject operator()(const UnaryExpr& expr) const;
     PopLObject operator()(const BinaryExpr& expr) const;
     PopLObject operator()(const VariableExpr& expr) const {
-        return environment.Get(expr.name);
+        return environment->Get(expr.name);
     }
     PopLObject operator()(const NilExpr& expr) const { return PopLObject{}; }
 
@@ -82,8 +88,22 @@ class Interpreter {
         if (left.isNumber() && right.isNumber()) return;
         throw RunTimeError(op, "Operands must be number");
     }
+    void ExecuteBlock(const std::vector<Stmt>& stmts, Environment* newEnv) {
+        Environment* previous = environment;
+        try {
+            environment = newEnv;
+            for (const auto& stmt : stmts) {
+                Execute(stmt);
+            }
+        } catch (...) {
+            environment = previous;
+            throw;
+        }
+        environment = previous;
+    }
 
    private:
-    Environment environment{};
+    Environment  m_global_environment{};
+    Environment* environment{&m_global_environment};
 };
 };  // namespace popl

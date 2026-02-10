@@ -59,6 +59,9 @@ class Parser {
     Stmt VarDeclaration();
     Stmt PrintStatement();
     Stmt ExpressionStatement();
+
+    std::vector<Stmt> BlockStatement();
+
     Stmt AssignmentStatement();
     Expr Expression();
     Expr Comma();
