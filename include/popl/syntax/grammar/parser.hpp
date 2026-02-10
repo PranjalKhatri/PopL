@@ -54,6 +54,9 @@ class Parser {
     std::unique_ptr<Expr> MakeExprPtr(Expr&& e) const {
         return std::make_unique<Expr>(std::move(e));
     }
+    std::unique_ptr<Stmt> MakeStmtPtr(Stmt&& stmt) const {
+        return std::make_unique<Stmt>(std::move(stmt));
+    }
     ParseError Error(Token token, const std::string& message) {
         Diagnostics::Error(token, message);
         return ParseError{};
@@ -65,6 +68,7 @@ class Parser {
     Stmt VarDeclaration();
     Stmt PrintStatement();
     Stmt ExpressionStatement();
+    Stmt IfStatement();
 
     std::vector<Stmt> BlockStatement();
 

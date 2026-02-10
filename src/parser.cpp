@@ -1,14 +1,12 @@
 #include "popl/syntax/grammar/parser.hpp"
 
 #include <memory>
-#include <optional>
-#include <print>
-#include <variant>
 #include <vector>
 
 #include "popl/lexer/token_types.hpp"
 #include "popl/literal.hpp"
 #include "popl/syntax/ast/expr.hpp"
+#include "popl/syntax/ast/stmt.hpp"
 
 namespace popl {
 
@@ -30,24 +28,15 @@ Stmt Parser::Declaration() {
 Stmt Parser::VarDeclaration() {
     Token name = Consume(TokenType::IDENTIFIER, "Expect variable name.");
 
-    Expr initializer{NilExpr{}};
-    if (Match({TokenType::EQUAL})) {
-        Expr rhs = Expression();
-        if (!std::holds_alternative<NilExpr>(rhs.node)) {
-            std::visit(
-                [&](auto&& node) {
-                    using T = std::decay_t<decltype(node)>;
-                    initializer.node.emplace<T>(std::move(node));
-                },
-                rhs.node);
-        }
-    }
+    Expr initializer =
+        Match({TokenType::EQUAL}) ? Expression() : Expr{NilExpr{}};
 
     Consume(TokenType::SEMICOLON, "Expect ';' after variable declaration.");
-    return Stmt{VarStmt{name, std::make_unique<Expr>(std::move(initializer))}};
+    return Stmt{VarStmt{name, MakeExprPtr(std::move(initializer))}};
 }
 
 Stmt Parser::Statement() {
+    if (Match({TokenType::IF})) return IfStatement();
     if (Match({TokenType::PRINT})) return PrintStatement();
     if (!IsAtEnd() && PeekNext().GetType() == TokenType::EQUAL &&
         Match({TokenType::IDENTIFIER}))
@@ -62,6 +51,19 @@ std::vector<Stmt> Parser::BlockStatement() {
         statements.emplace_back(Declaration());
     Consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
     return statements;
+}
+Stmt Parser::IfStatement() {
+    Consume(TokenType::LEFT_PAREN, "Expect '(' after 'if'.");
+    Expr condition = Expression();
+    Consume(TokenType::RIGHT_PAREN, "Expect ')' after if condition.");
+
+    Stmt thenBranch = Statement();
+
+    Stmt elseBranch = Match({TokenType::ELSE}) ? Statement() : Stmt{NilStmt{}};
+
+    return Stmt{IfStmt{MakeExprPtr(std::move(condition)),
+                       MakeStmtPtr(std::move(thenBranch)),
+                       MakeStmtPtr(std::move(elseBranch))}};
 }
 Stmt Parser::PrintStatement() {
     auto value = std::make_unique<Expr>(Expression());
