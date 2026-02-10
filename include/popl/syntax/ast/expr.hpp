@@ -43,9 +43,16 @@ struct VariableExpr {
     Token name;
 };
 
+struct LogicalExpr {
+    std::unique_ptr<Expr> left;
+    Token                 op;
+    std::unique_ptr<Expr> right;
+};
+
 struct Expr {
-    using Variant = std::variant<NilExpr, BinaryExpr, TernaryExpr, GroupingExpr,
-                                 LiteralExpr, UnaryExpr, VariableExpr>;
+    using Variant =
+        std::variant<NilExpr, BinaryExpr, TernaryExpr, GroupingExpr,
+                     LiteralExpr, UnaryExpr, VariableExpr, LogicalExpr>;
 
     Variant node;
 };

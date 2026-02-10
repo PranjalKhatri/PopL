@@ -147,7 +147,9 @@ int main(int argc, char** argv) {
         "Grouping" + exprBaseName + " : " + exprBaseName + "* expression",
         "Literal" + exprBaseName + "  : PopLObject value",
         "Unary" + exprBaseName + "    : Token op, " + exprBaseName + "* right",
-        "Variable" + exprBaseName + "    : Token name"};
+        "Variable" + exprBaseName + "    : Token name",
+        "Logical" + exprBaseName + " : " + exprBaseName +
+            "* left , Token op, " + exprBaseName + "* right"};
 
     std::string              stmtBaseName{"Stmt"};
     std::vector<std::string> StmtTypes = {
