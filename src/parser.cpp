@@ -122,7 +122,7 @@ Expr Parser::Comma() {
     return ParseBinary(&Parser::Ternary, {TokenType::COMMA});
 }
 Expr Parser::Ternary() {
-    Expr expr = Equality();
+    Expr expr = OrExpression();
     if (Match({TokenType::QUESTION})) {
         Token question = Previous();
         Expr  middle   = Expression();
@@ -134,6 +134,12 @@ Expr Parser::Ternary() {
                                        MakeExprPtr(std::move(right)));
     }
     return expr;
+}
+Expr Parser::OrExpression() {
+    return ParseBinary<LogicalExpr>(&Parser::AndExpression, {TokenType::OR});
+}
+Expr Parser::AndExpression() {
+    return ParseBinary<LogicalExpr>(&Parser::Equality, {TokenType::AND});
 }
 Expr Parser::Equality() {
     return ParseBinary(&Parser::Comparison,
