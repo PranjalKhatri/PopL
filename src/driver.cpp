@@ -57,6 +57,5 @@ void Driver::Run(std::string source, bool replMode) {
     auto   statements = parser.Parse();
     if (Diagnostics::HadError()) return;
     interpreter.Interpret(statements, replMode);
-    // std::println("{}", AstPrinter{}.Print(expression.value()));
 }
 };  // namespace popl
