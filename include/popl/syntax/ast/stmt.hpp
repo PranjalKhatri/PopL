@@ -34,9 +34,15 @@ struct AssignStmt {
     std::unique_ptr<Expr> value;
 };
 
+struct IfStmt {
+    std::unique_ptr<Expr> condition;
+    std::unique_ptr<Stmt> thenBranch;
+    std::unique_ptr<Stmt> elseBranch;
+};
+
 struct Stmt {
     using Variant = std::variant<NilStmt, BlockStmt, ExpressionStmt, PrintStmt,
-                                 VarStmt, AssignStmt>;
+                                 VarStmt, AssignStmt, IfStmt>;
 
     Variant node;
 };
