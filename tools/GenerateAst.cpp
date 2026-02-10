@@ -151,11 +151,14 @@ int main(int argc, char** argv) {
 
     std::string              stmtBaseName{"Stmt"};
     std::vector<std::string> StmtTypes = {
-        "Block" + stmtBaseName + " : std::vector<Stmt> statements",
-        "Expression" + stmtBaseName + " : Expr* expression",
-        "Print" + stmtBaseName + ": Expr* expression",
-        "Var" + stmtBaseName + ": Token name, Expr* initializer",
-        "Assign" + stmtBaseName + ": Token name, " + exprBaseName + "* value"};
+        "Block" + stmtBaseName + ": std::vector<Stmt> statements",
+        "Expression" + stmtBaseName + ": " + exprBaseName + "* expression",
+        "Print" + stmtBaseName + ": " + exprBaseName + "* expression",
+        "Var" + stmtBaseName + ": Token name, " + exprBaseName +
+            "* initializer",
+        "Assign" + stmtBaseName + ": Token name, " + exprBaseName + "* value",
+        "If" + stmtBaseName + ": " + exprBaseName + "* condition, " +
+            stmtBaseName + "* thenBranch, " + stmtBaseName + "* elseBranch"};
 
     DefineAst(exprBaseName, outputDir, ExprTypes);
     DefineAst(stmtBaseName, outputDir, StmtTypes);
