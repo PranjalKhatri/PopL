@@ -23,7 +23,8 @@ void Diagnostics::Error(Token token, std::string_view message) {
 }
 
 void Diagnostics::ReportRunTimeError(const RunTimeError& error) {
-    std::println("{}\n[line {}]", error.what(), error.GetToken().GetLine());
+    std::println("[RunTimeError] : {} at {} at [line {}]", error.what(),
+                 error.GetToken().GetLexeme(), error.GetToken().GetLine());
     ms_had_runtime_error = true;
 }
 
