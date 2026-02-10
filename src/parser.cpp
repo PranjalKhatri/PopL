@@ -50,9 +50,17 @@ Stmt Parser::Statement() {
     if (Match({TokenType::PRINT})) return PrintStatement();
     if (Match({TokenType::IDENTIFIER}) && Peek().GetType() == TokenType::EQUAL)
         return AssignmentStatement();
+    if (Match({TokenType::LEFT_BRACE}))
+        return Stmt{BlockStmt{BlockStatement()}};
     return ExpressionStatement();
 }
-
+std::vector<Stmt> Parser::BlockStatement() {
+    std::vector<Stmt> statements;
+    while (!Check(TokenType::RIGHT_BRACE) && !IsAtEnd())
+        statements.emplace_back(Declaration());
+    Consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
+    return statements;
+}
 Stmt Parser::PrintStatement() {
     auto value = std::make_unique<Expr>(Expression());
     Consume(TokenType::SEMICOLON, "Expect ; after value.");
