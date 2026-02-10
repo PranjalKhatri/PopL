@@ -16,7 +16,8 @@ namespace popl {
 // TODO: Reason about environment pointer
 class Interpreter {
    public:
-    void Interpret(const std::vector<Stmt>& statements) {
+    void Interpret(const std::vector<Stmt>& statements, bool replMode) {
+        m_repl_mode = replMode;
         try {
             for (const auto& statement : statements) {
                 Execute(statement);
@@ -29,7 +30,8 @@ class Interpreter {
      * Statement visitor
      */
     void operator()(const ExpressionStmt& stmt) {
-        Evaluate(*(stmt.expression));
+        PopLObject obj = Evaluate(*(stmt.expression));
+        if (m_repl_mode) std::println("{}", obj.toString());
     }
     void operator()(const PrintStmt& stmt) {
         PopLObject value = Evaluate(*(stmt.expression));
@@ -105,5 +107,6 @@ class Interpreter {
    private:
     Environment  m_global_environment{};
     Environment* environment{&m_global_environment};
+    bool         m_repl_mode{false};
 };
 };  // namespace popl
