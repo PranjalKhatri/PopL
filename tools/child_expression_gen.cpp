@@ -151,6 +151,7 @@ int main(int argc, char** argv) {
 
     std::string              stmtBaseName{"Stmt"};
     std::vector<std::string> StmtTypes = {
+        "Block" + stmtBaseName + " : std::vector<Stmt> statements",
         "Expression" + stmtBaseName + " : Expr* expression",
         "Print" + stmtBaseName + ": Expr* expression",
         "Var" + stmtBaseName + ": Token name, Expr* initializer",

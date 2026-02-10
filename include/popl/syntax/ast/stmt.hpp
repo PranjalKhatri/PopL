@@ -12,6 +12,10 @@ struct Stmt;
 
 struct NilStmt {};
 
+struct BlockStmt {
+    std::vector<Stmt> statements;
+};
+
 struct ExpressionStmt {
     std::unique_ptr<Expr> expression;
 };
@@ -31,8 +35,8 @@ struct AssignStmt {
 };
 
 struct Stmt {
-    using Variant =
-        std::variant<NilStmt, ExpressionStmt, PrintStmt, VarStmt, AssignStmt>;
+    using Variant = std::variant<NilStmt, BlockStmt, ExpressionStmt, PrintStmt,
+                                 VarStmt, AssignStmt>;
 
     Variant node;
 };
