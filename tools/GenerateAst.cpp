@@ -139,28 +139,33 @@ int main(int argc, char** argv) {
     std::string outputDir = argv[1];
 
     std::vector<std::string> ExprTypes = {
-        "Binary" + exprBaseName + "   : " + exprBaseName +
-            "* left, Token op, " + exprBaseName + "* right",
-        "Ternary" + exprBaseName + "  : " + exprBaseName +
-            "* condition, Token question, " + exprBaseName +
-            "* thenBranch, Token colon, " + exprBaseName + "* elseBranch",
-        "Grouping" + exprBaseName + " : " + exprBaseName + "* expression",
-        "Literal" + exprBaseName + "  : PopLObject value",
-        "Unary" + exprBaseName + "    : Token op, " + exprBaseName + "* right",
-        "Variable" + exprBaseName + "    : Token name",
-        "Logical" + exprBaseName + " : " + exprBaseName +
-            "* left , Token op, " + exprBaseName + "* right"};
+        std::format("Binary{}: {}* left, Token op, {}* right", exprBaseName,
+                    exprBaseName, exprBaseName),
+        std::format("Ternary{}: {}* condition, Token question, {}* thenBranch, "
+                    "Token colon, {}* elseBranch",
+                    exprBaseName, exprBaseName, exprBaseName, exprBaseName),
+        std::format("Grouping{}: {}* expression", exprBaseName, exprBaseName),
+        std::format("Literal{}: PopLObject value", exprBaseName),
+        std::format("Unary{}: Token op, {}* right", exprBaseName, exprBaseName),
+        std::format("Variable{}: Token name", exprBaseName),
+        std::format("Logical{}: {}* left, Token op, {}* right", exprBaseName,
+                    exprBaseName, exprBaseName),
+    };
 
     std::string              stmtBaseName{"Stmt"};
     std::vector<std::string> StmtTypes = {
-        "Block" + stmtBaseName + ": std::vector<Stmt> statements",
-        "Expression" + stmtBaseName + ": " + exprBaseName + "* expression",
-        "Print" + stmtBaseName + ": " + exprBaseName + "* expression",
-        "Var" + stmtBaseName + ": Token name, " + exprBaseName +
-            "* initializer",
-        "Assign" + stmtBaseName + ": Token name, " + exprBaseName + "* value",
-        "If" + stmtBaseName + ": " + exprBaseName + "* condition, " +
-            stmtBaseName + "* thenBranch, " + stmtBaseName + "* elseBranch"};
+        std::format("Block{}: std::vector<Stmt> statements", stmtBaseName),
+        std::format("Expression{}: {}* expression", stmtBaseName, exprBaseName),
+        std::format("Print{}: {}* expression", stmtBaseName, exprBaseName),
+        std::format("Var{}: Token name, {}* initializer", stmtBaseName,
+                    exprBaseName),
+        std::format("Assign{}: Token name, {}* value", stmtBaseName,
+                    exprBaseName),
+        std::format("If{}: {}* condition, {}* thenBranch, {}* elseBranch",
+                    stmtBaseName, exprBaseName, stmtBaseName, stmtBaseName),
+        std::format("While{}: {}* condition, {}* body", stmtBaseName,
+                    exprBaseName, stmtBaseName),
+    };
 
     DefineAst(exprBaseName, outputDir, ExprTypes);
     DefineAst(stmtBaseName, outputDir, StmtTypes);
