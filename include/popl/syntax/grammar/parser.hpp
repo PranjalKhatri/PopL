@@ -29,6 +29,12 @@ class Parser {
     // Check if END_OF_FILE token is reached
     bool  IsAtEnd() const { return Peek().GetType() == TokenType::END_OF_FILE; }
     Token Peek() const { return m_tokens.at(m_current); }
+    Token PeekNext() const {
+        if (!IsAtEnd()) return m_tokens.at(m_current + 1);
+        assert(false && "PeekNext called at last");
+        // TODO: Do Something
+        return Peek();
+    }
     Token Previous() const { return m_tokens.at(m_current - 1); };
 
     Token Advance() {
