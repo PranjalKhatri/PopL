@@ -40,9 +40,14 @@ struct IfStmt {
     std::unique_ptr<Stmt> elseBranch;
 };
 
+struct WhileStmt {
+    std::unique_ptr<Expr> condition;
+    std::unique_ptr<Stmt> body;
+};
+
 struct Stmt {
     using Variant = std::variant<NilStmt, BlockStmt, ExpressionStmt, PrintStmt,
-                                 VarStmt, AssignStmt, IfStmt>;
+                                 VarStmt, AssignStmt, IfStmt, WhileStmt>;
 
     Variant node;
 };
