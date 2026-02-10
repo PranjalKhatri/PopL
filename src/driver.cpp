@@ -33,7 +33,7 @@ int Driver::RunRepl() {
         if (!std::getline(std::cin, line)) {
             break;
         }
-        Run(line);
+        Run(line, true);
         Diagnostics::ResetError();
     }
     return 0;
@@ -50,13 +50,13 @@ int Driver::RunFile(std::string_view path) {
     return 74;
 }
 
-void Driver::Run(std::string source) {
+void Driver::Run(std::string source, bool replMode) {
     Lexer  lexer{std::move(source)};
     auto   tokens{lexer.ScanTokens()};
     Parser parser{tokens};
     auto   statements = parser.Parse();
     if (Diagnostics::HadError()) return;
-    interpreter.Interpret(statements);
+    interpreter.Interpret(statements, replMode);
     // std::println("{}", AstPrinter{}.Print(expression.value()));
 }
 };  // namespace popl

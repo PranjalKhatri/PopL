@@ -12,7 +12,7 @@ class Driver {
     int Init(int argc, char** argv);
 
    private:
-    void Run(std::string source);
+    void Run(std::string source, bool replMode = false);
     int  RunRepl();
     int  RunFile(std::string_view path);
     void PrintUsage() const;
