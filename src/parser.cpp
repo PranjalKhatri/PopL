@@ -36,6 +36,7 @@ Stmt Parser::VarDeclaration() {
 }
 
 Stmt Parser::Statement() {
+    if (Match({TokenType::WHILE})) return WhileStatement();
     if (Match({TokenType::IF})) return IfStatement();
     if (Match({TokenType::PRINT})) return PrintStatement();
     if (!IsAtEnd() && PeekNext().GetType() == TokenType::EQUAL &&
@@ -51,6 +52,14 @@ std::vector<Stmt> Parser::BlockStatement() {
         statements.emplace_back(Declaration());
     Consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
     return statements;
+}
+Stmt Parser::WhileStatement() {
+    Consume(TokenType::LEFT_PAREN, "Expect '(' after 'while'.");
+    Expr condition = Expression();
+    Consume(TokenType::RIGHT_PAREN, "Expect ')' after condition.");
+    Stmt thenBranch = Statement();
+    return Stmt{WhileStmt{MakeExprPtr(std::move(condition)),
+                          MakeStmtPtr(std::move(thenBranch))}};
 }
 Stmt Parser::IfStatement() {
     Consume(TokenType::LEFT_PAREN, "Expect '(' after 'if'.");

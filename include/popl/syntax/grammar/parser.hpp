@@ -69,6 +69,7 @@ class Parser {
     Stmt PrintStatement();
     Stmt ExpressionStatement();
     Stmt IfStatement();
+    Stmt WhileStatement();
 
     std::vector<Stmt> BlockStatement();
 
