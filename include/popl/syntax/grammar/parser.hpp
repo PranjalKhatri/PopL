@@ -76,6 +76,8 @@ class Parser {
     Expr Expression();
     Expr Comma();
     Expr Ternary();
+    Expr OrExpression();
+    Expr AndExpression();
     Expr Equality();
     Expr Comparison();
     Expr Term();
@@ -83,7 +85,7 @@ class Parser {
     Expr Unary();
     Expr Primary();
 
-    template <typename SubParser>
+    template <typename ExprType = BinaryExpr, typename SubParser>
     Expr ParseBinary(SubParser&&                      parseOperand,
                      std::initializer_list<TokenType> ops);
 
@@ -92,7 +94,7 @@ class Parser {
     int                m_current{};
 };
 
-template <typename SubParser>
+template <typename ExprType, typename SubParser>
 Expr Parser::ParseBinary(SubParser&&                      parseOperand,
                          std::initializer_list<TokenType> ops) {
     Expr expr = (this->*parseOperand)();
@@ -101,8 +103,8 @@ Expr Parser::ParseBinary(SubParser&&                      parseOperand,
         Token op    = Previous();
         Expr  right = (this->*parseOperand)();
 
-        expr.node.emplace<BinaryExpr>(MakeExprPtr(std::move(expr)), op,
-                                      MakeExprPtr(std::move(right)));
+        expr.node.emplace<ExprType>(MakeExprPtr(std::move(expr)), op,
+                                    MakeExprPtr(std::move(right)));
     }
 
     return expr;
