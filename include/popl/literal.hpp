@@ -5,14 +5,20 @@
 #include <variant>
 
 namespace popl {
+struct UninitializedValue {};
+struct NilValue {};
 
-using NilValue = std::monostate;
+inline bool operator==(const UninitializedValue&, const UninitializedValue&) {
+    return false;
+}
+inline bool operator==(const NilValue&, const NilValue&) { return false; }
 
 class PopLObject {
    public:
-    using Value = std::variant<NilValue, double, std::string, bool>;
+    using Value =
+        std::variant<UninitializedValue, NilValue, double, std::string, bool>;
 
-    PopLObject() = default;  // nil
+    PopLObject() = default;  // Uninitialized
     explicit PopLObject(NilValue) : m_data{} {}
     explicit PopLObject(double d) : m_data(d) {}
     explicit PopLObject(bool b) : m_data(b) {}
@@ -21,6 +27,9 @@ class PopLObject {
 
     // type checks
     bool isNil() const { return std::holds_alternative<NilValue>(m_data); }
+    bool isUninitialized() const {
+        return std::holds_alternative<UninitializedValue>(m_data);
+    }
     bool isNumber() const { return std::holds_alternative<double>(m_data); }
     bool isString() const {
         return std::holds_alternative<std::string>(m_data);
@@ -35,7 +44,7 @@ class PopLObject {
     bool asBool() const { return std::get<bool>(m_data); }
 
     bool isTruthy() const {
-        if (isNil()) return false;
+        if (isNil() || isUninitialized()) return false;
         if (isBool()) return asBool();
         return true;
     }
@@ -44,7 +53,9 @@ class PopLObject {
         return std::visit(
             [](auto&& v) -> std::string {
                 using T = std::decay_t<decltype(v)>;
-                if constexpr (std::is_same_v<T, NilValue>)
+                if constexpr (std::is_same_v<T, UninitializedValue>) {
+                    return "<Uninitialized>";
+                } else if constexpr (std::is_same_v<T, NilValue>)
                     return "nil";
                 else if constexpr (std::is_same_v<T, bool>)
                     return v ? "true" : "false";
