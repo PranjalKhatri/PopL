@@ -3,6 +3,7 @@
 #include "popl/syntax/ast/expr.hpp"
 
 namespace popl {
+// TODO: Update it for newer statements and expressions
 struct AstPrinter {
     std::string Print(const Expr& expr) { return visitExpr(expr, *this); }
 
