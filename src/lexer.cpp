@@ -78,8 +78,8 @@ std::vector<Token> Lexer::ScanTokens() {
         m_start = m_current;
         ScanToken();
     }
-    m_tokens.emplace_back(TokenType::END_OF_FILE, "",
-                          PopLObject{std::monostate{}}, m_line);
+    m_tokens.emplace_back(TokenType::END_OF_FILE, "", PopLObject{NilValue{}},
+                          m_line);
     return m_tokens;
 }
 void Lexer::ScanToken() {
