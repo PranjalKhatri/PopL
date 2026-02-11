@@ -55,6 +55,7 @@ enum class TokenType {
     TRUE,
     VAR,
     WHILE,
+    BREAK,
 
     END_OF_FILE,
 
@@ -66,7 +67,8 @@ struct Keyword {
     TokenType        type;
 };
 
-constexpr std::array<Keyword, 16> Keywords = {{
+constexpr std::array<Keyword, 17> Keywords = {{
+
     {"and", TokenType::AND},
     {"class", TokenType::CLASS},
     {"else", TokenType::ELSE},
@@ -83,7 +85,7 @@ constexpr std::array<Keyword, 16> Keywords = {{
     {"true", TokenType::TRUE},
     {"var", TokenType::VAR},
     {"while", TokenType::WHILE},
-}};
+    {"break", TokenType::BREAK}}};
 
 constexpr TokenType KeywordOrIdentifier(std::string_view s) {
     for (const auto& [kw, type] : Keywords) {
