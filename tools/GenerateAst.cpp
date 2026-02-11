@@ -147,6 +147,9 @@ int main(int argc, char** argv) {
         std::format("Grouping{}: {}* expression", exprBaseName, exprBaseName),
         std::format("Literal{}: PopLObject value", exprBaseName),
         std::format("Unary{}: Token op, {}* right", exprBaseName, exprBaseName),
+        std::format("Call{} : {}* callee, Token ClosingParen, std::vector<{}> "
+                    "arguments",
+                    exprBaseName, exprBaseName, exprBaseName),
         std::format("Variable{}: Token name", exprBaseName),
         std::format("Logical{}: {}* left, Token op, {}* right", exprBaseName,
                     exprBaseName, exprBaseName),
