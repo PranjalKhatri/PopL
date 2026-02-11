@@ -87,7 +87,9 @@ class Interpreter {
     PopLObject operator()(const VariableExpr& expr) const {
         return environment->Get(expr.name);
     }
-    PopLObject operator()(const NilExpr& expr) const { return PopLObject{}; }
+    PopLObject operator()(const NilExpr& expr) const {
+        return PopLObject{NilValue{}};
+    }
     PopLObject operator()(const LogicalExpr& expr) const {
         auto left{Evaluate(*expr.left)};
         if (expr.op.GetType() == TokenType::OR) {
