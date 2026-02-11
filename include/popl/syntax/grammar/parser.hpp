@@ -70,6 +70,7 @@ class Parser {
     Stmt ExpressionStatement();
     Stmt IfStatement();
     Stmt WhileStatement();
+    Stmt ForStatement();
 
     std::vector<Stmt> BlockStatement();
 

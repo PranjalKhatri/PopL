@@ -1,6 +1,7 @@
 #include "popl/syntax/grammar/parser.hpp"
 
 #include <memory>
+#include <variant>
 #include <vector>
 
 #include "popl/lexer/token_types.hpp"
@@ -37,6 +38,7 @@ Stmt Parser::VarDeclaration() {
 
 Stmt Parser::Statement() {
     if (Match({TokenType::WHILE})) return WhileStatement();
+    if (Match({TokenType::FOR})) return ForStatement();
     if (Match({TokenType::IF})) return IfStatement();
     if (Match({TokenType::PRINT})) return PrintStatement();
     if (!IsAtEnd() && PeekNext().GetType() == TokenType::EQUAL &&
@@ -60,6 +62,46 @@ Stmt Parser::WhileStatement() {
     Stmt thenBranch = Statement();
     return Stmt{WhileStmt{MakeExprPtr(std::move(condition)),
                           MakeStmtPtr(std::move(thenBranch))}};
+}
+Stmt Parser::ForStatement() {
+    Consume(TokenType::LEFT_PAREN, "Expect '(' after 'for'.");
+
+    Stmt initializer = Match({TokenType::SEMICOLON})
+                           ? Stmt{NilStmt{}}
+                           : (Match({TokenType::VAR}) ? VarDeclaration()
+                                                      : ExpressionStatement());
+
+    Expr condition =
+        Check(TokenType::SEMICOLON) ? Expr{NilExpr{}} : Expression();
+    Consume(TokenType::SEMICOLON, "Expect ';' after loop condition.");
+
+    Expr increment =
+        Check(TokenType::RIGHT_PAREN) ? Expr{NilExpr{}} : Expression();
+    Consume(TokenType::RIGHT_PAREN, "Expect ')' after for clauses.");
+
+    Stmt body = Statement();
+
+    if (!std::holds_alternative<NilExpr>(increment.node)) {
+        std::vector<Stmt> stmts;
+        stmts.push_back(std::move(body));
+        stmts.push_back(
+            Stmt{ExpressionStmt{MakeExprPtr(std::move(increment))}});
+        body.node = BlockStmt{std::move(stmts)};
+    }
+    if (std::holds_alternative<NilExpr>(condition.node))
+        condition.node = LiteralExpr{PopLObject{true}};
+
+    body.node = WhileStmt{MakeExprPtr(std::move(condition)),
+                          MakeStmtPtr(std::move(body))};
+
+    if (!std::holds_alternative<NilStmt>(initializer.node)) {
+        std::vector<Stmt> stmts;
+        stmts.push_back(std::move(initializer));
+        stmts.push_back(std::move(body));
+        body.node = BlockStmt{std::move(stmts)};
+    }
+
+    return body;
 }
 Stmt Parser::IfStatement() {
     Consume(TokenType::LEFT_PAREN, "Expect '(' after 'if'.");
