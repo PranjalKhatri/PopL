@@ -41,6 +41,7 @@ Stmt Parser::Statement() {
     if (Match({TokenType::FOR})) return ForStatement();
     if (Match({TokenType::IF})) return IfStatement();
     if (Match({TokenType::PRINT})) return PrintStatement();
+    if (Match({TokenType::BREAK})) return BreakStatement();
     if (!IsAtEnd() && PeekNext().GetType() == TokenType::EQUAL &&
         Match({TokenType::IDENTIFIER}))
         return AssignmentStatement();
@@ -54,6 +55,10 @@ std::vector<Stmt> Parser::BlockStatement() {
         statements.emplace_back(Declaration());
     Consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
     return statements;
+}
+Stmt Parser::BreakStatement() {
+    Consume(TokenType::SEMICOLON, "Expect ; after 'break'.");
+    return Stmt{BreakStmt{Previous()}};
 }
 Stmt Parser::WhileStatement() {
     Consume(TokenType::LEFT_PAREN, "Expect '(' after 'while'.");
