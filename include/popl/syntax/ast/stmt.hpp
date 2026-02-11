@@ -45,9 +45,15 @@ struct WhileStmt {
     std::unique_ptr<Stmt> body;
 };
 
+struct BreakStmt {
+    Token keyword;
+    ;
+};
+
 struct Stmt {
-    using Variant = std::variant<NilStmt, BlockStmt, ExpressionStmt, PrintStmt,
-                                 VarStmt, AssignStmt, IfStmt, WhileStmt>;
+    using Variant =
+        std::variant<NilStmt, BlockStmt, ExpressionStmt, PrintStmt, VarStmt,
+                     AssignStmt, IfStmt, WhileStmt, BreakStmt>;
 
     Variant node;
 };
