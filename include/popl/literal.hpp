@@ -1,8 +1,11 @@
 #pragma once
 
 #include <format>
+#include <memory>
 #include <string>
 #include <variant>
+
+#include "popl/callable.hpp"
 
 namespace popl {
 struct UninitializedValue {};
@@ -15,8 +18,9 @@ inline bool operator==(const NilValue&, const NilValue&) { return false; }
 
 class PopLObject {
    public:
-    using Value =
-        std::variant<UninitializedValue, NilValue, double, std::string, bool>;
+    using SPtrCallable = std::shared_ptr<callable::PoplCallable>;
+    using Value        = std::variant<UninitializedValue, NilValue, double,
+                                      std::string, bool, SPtrCallable>;
 
     PopLObject() = default;  // Uninitialized
     explicit PopLObject(NilValue) : m_data{} {}
@@ -35,6 +39,10 @@ class PopLObject {
         return std::holds_alternative<std::string>(m_data);
     }
     bool isBool() const { return std::holds_alternative<bool>(m_data); }
+    bool isCallable() const {
+        return std::holds_alternative<std::shared_ptr<callable::PoplCallable>>(
+            m_data);
+    }
 
     // accessors throws on misuse
     double             asNumber() const { return std::get<double>(m_data); }
@@ -59,6 +67,8 @@ class PopLObject {
                     return "nil";
                 else if constexpr (std::is_same_v<T, bool>)
                     return v ? "true" : "false";
+                else if constexpr (std::is_same_v<T, SPtrCallable>)
+                    return "PopLCallable()";
                 else if constexpr (std::is_same_v<T, double>) {
                     std::string s = std::to_string(v);
                     s.erase(s.find_last_not_of('0') + 1);
