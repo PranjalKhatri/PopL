@@ -76,18 +76,20 @@ class Parser {
 
     std::vector<Stmt> BlockStatement();
 
-    Stmt AssignmentStatement();
-    Expr Expression();
-    Expr Comma();
-    Expr Ternary();
-    Expr OrExpression();
-    Expr AndExpression();
-    Expr Equality();
-    Expr Comparison();
-    Expr Term();
-    Expr Factor();
-    Expr Unary();
-    Expr Primary();
+    Stmt     AssignmentStatement();
+    Expr     Expression();
+    Expr     Comma();
+    Expr     Ternary();
+    Expr     OrExpression();
+    Expr     AndExpression();
+    Expr     Equality();
+    Expr     Comparison();
+    Expr     Term();
+    Expr     Factor();
+    Expr     Unary();
+    Expr     CallExpression();
+    CallExpr FinishCall(Expr callee);
+    Expr     Primary();
 
     template <typename ExprType = BinaryExpr, typename SubParser>
     Expr ParseBinary(SubParser&&                      parseOperand,

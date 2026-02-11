@@ -221,7 +221,30 @@ Expr Parser::Unary() {
     if (Match({TokenType::BANG, TokenType::MINUS})) {
         return Expr{UnaryExpr{Previous(), MakeExprPtr(Unary())}};
     }
-    return Primary();
+    return CallExpression();
+}
+Expr Parser::CallExpression() {
+    Expr expr{Primary()};
+    while (true) {
+        if (Match({TokenType::LEFT_PAREN})) {
+            expr.node.emplace<CallExpr>(FinishCall(std::move(expr)));
+        } else {
+            break;
+        }
+    }
+    return expr;
+}
+CallExpr Parser::FinishCall(Expr callee) {
+    std::vector<Expr> arguments;
+    if (!Check(TokenType::RIGHT_PAREN)) {
+        do {
+            arguments.push_back(Expression());
+        } while (Match({TokenType::COMMA}));
+    }
+    Token paren =
+        Consume(TokenType::RIGHT_PAREN, "Expects ')' after arguments.");
+    return CallExpr{MakeExprPtr(std::move(callee)), paren,
+                    std::move(arguments)};
 }
 Expr Parser::Primary() {
     if (Match({TokenType::FALSE})) return Expr{LiteralExpr{PopLObject{false}}};
