@@ -47,7 +47,6 @@ struct WhileStmt {
 
 struct BreakStmt {
     Token keyword;
-    ;
 };
 
 struct Stmt {

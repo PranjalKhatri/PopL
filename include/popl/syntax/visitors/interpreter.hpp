@@ -7,7 +7,7 @@
 #include "popl/diagnostics.hpp"
 #include "popl/environment.hpp"
 #include "popl/literal.hpp"
-#include "popl/syntax/Exceptions/run_time_error.hpp"
+#include "popl/runtime/run_time_error.hpp"
 #include "popl/syntax/ast/expr.hpp"
 #include "popl/syntax/ast/stmt.hpp"
 
@@ -22,7 +22,7 @@ class Interpreter {
             for (const auto& statement : statements) {
                 Execute(statement);
             }
-        } catch (const RunTimeError& error) {
+        } catch (const runtime::RunTimeError& error) {
             Diagnostics::ReportRunTimeError(error);
         }
     }
@@ -67,7 +67,8 @@ class Interpreter {
     void operator()(const WhileStmt& stmt);
     void operator()(const BreakStmt& stmt) {
         if (!m_in_loop)
-            throw RunTimeError(stmt.keyword, "'break' outside of any loop.");
+            throw runtime::RunTimeError(stmt.keyword,
+                                        "'break' outside of any loop.");
         m_break_flag = true;
     }
     /*
@@ -111,16 +112,16 @@ class Interpreter {
 
     void CheckNumberOperand(const Token& op, const PopLObject& operand) const {
         if (operand.isNumber()) return;
-        throw RunTimeError(op, "Operand must be a number.");
+        throw runtime::RunTimeError(op, "Operand must be a number.");
     }
     void CheckNumberOperand(const Token& op, const PopLObject& left,
                             const PopLObject& right) const {
         if (left.isNumber() && right.isNumber()) return;
-        throw RunTimeError(op, "Operands must be number");
+        throw runtime::RunTimeError(op, "Operands must be number");
     }
     void CheckUninitialised(const Token& op, const PopLObject& value) const {
         if (value.isUninitialized())
-            throw RunTimeError(op, "Use of Uninitialized value");
+            throw runtime::RunTimeError(op, "Use of Uninitialized value");
     }
     void ExecuteBlock(const std::vector<Stmt>& stmts, Environment* newEnv) {
         Environment* previous = environment;

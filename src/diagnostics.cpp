@@ -4,7 +4,7 @@
 #include <print>
 #include <string_view>
 
-#include "popl/syntax/Exceptions/run_time_error.hpp"
+#include "popl/runtime/run_time_error.hpp"
 
 namespace popl {
 
@@ -22,7 +22,7 @@ void Diagnostics::Error(Token token, std::string_view message) {
         Report(token.GetLine(), " at '" + token.GetLexeme() + "'", message);
 }
 
-void Diagnostics::ReportRunTimeError(const RunTimeError& error) {
+void Diagnostics::ReportRunTimeError(const runtime::RunTimeError& error) {
     std::println("[RunTimeError] : {} at {} at [line {}]", error.what(),
                  error.GetToken().GetLexeme(), error.GetToken().GetLine());
     ms_had_runtime_error = true;

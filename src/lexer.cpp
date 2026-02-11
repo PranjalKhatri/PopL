@@ -1,7 +1,6 @@
 #include "popl/lexer/lexer.hpp"
 
 #include <cctype>
-#include <variant>
 
 #include "popl/diagnostics.hpp"
 #include "popl/lexer/token_types.hpp"

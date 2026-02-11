@@ -1,9 +1,8 @@
 #pragma once
-#include <memory>
 
 #include "popl/lexer/token.hpp"
 #include "popl/literal.hpp"
-#include "popl/syntax/Exceptions/run_time_error.hpp"
+#include "popl/runtime/run_time_error.hpp"
 
 namespace popl {
 class Environment {
@@ -29,8 +28,8 @@ class Environment {
 
         if (m_enclosing) return m_enclosing->Lookup(name);
 
-        throw RunTimeError(name,
-                           "Undefined variable '" + name.GetLexeme() + "'.");
+        throw runtime::RunTimeError(
+            name, "Undefined variable '" + name.GetLexeme() + "'.");
     }
 
     const PopLObject& Lookup(const Token& name) const {
