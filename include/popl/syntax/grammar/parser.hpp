@@ -72,6 +72,7 @@ class Parser {
     Stmt WhileStatement();
     Stmt ForStatement();
     Stmt BreakStatement();
+    Stmt ContinueStatement();
 
     std::vector<Stmt> BlockStatement();
 
