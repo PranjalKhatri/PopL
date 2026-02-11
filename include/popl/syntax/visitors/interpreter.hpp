@@ -1,12 +1,12 @@
 #pragma once
 
-#include <memory>
 #include <print>
 #include <variant>
 
 #include "popl/diagnostics.hpp"
 #include "popl/environment.hpp"
 #include "popl/literal.hpp"
+#include "popl/runtime/control_flow.hpp"
 #include "popl/runtime/run_time_error.hpp"
 #include "popl/syntax/ast/expr.hpp"
 #include "popl/syntax/ast/stmt.hpp"
@@ -48,15 +48,15 @@ class Interpreter {
         PopLObject value{};
         if (!std::holds_alternative<NilExpr>(stmt.initializer->node))
             value = Evaluate(*(stmt.initializer));
-        m_environment->Define(stmt.name, value);
+        environment->Define(stmt.name, value);
     }
     void operator()(const BlockStmt& stmt) {
-        Environment blockEnv(m_environment);
+        Environment blockEnv(environment);
         ExecuteBlock(stmt.statements, &blockEnv);
     }
     void operator()(const AssignStmt& stmt) {
         PopLObject value{Evaluate(*(stmt.value))};
-        m_environment->Assign(stmt.name, value);
+        environment->Assign(stmt.name, value);
     }
     void operator()(const IfStmt& stmt) {
         if (Evaluate(*stmt.condition).isTruthy())
@@ -66,10 +66,9 @@ class Interpreter {
     }
     void operator()(const WhileStmt& stmt);
     void operator()(const BreakStmt& stmt) {
-        if (!m_in_loop)
-            throw runtime::RunTimeError(stmt.keyword,
-                                        "'break' outside of any loop.");
-        m_break_flag = true;
+        if (m_loop_depth > 0) throw runtime::control_flow::BreakSignal{};
+        throw runtime::RunTimeError{
+            stmt.keyword, "'break' statement can't be used outside of loops."};
     }
     /*
      * Expression visitor
@@ -89,7 +88,7 @@ class Interpreter {
     PopLObject operator()(const UnaryExpr& expr) const;
     PopLObject operator()(const BinaryExpr& expr) const;
     PopLObject operator()(const VariableExpr& expr) const {
-        return m_environment->Get(expr.name);
+        return environment->Get(expr.name);
     }
     PopLObject operator()(const NilExpr& expr) const {
         return PopLObject{NilValue{}};
@@ -105,6 +104,16 @@ class Interpreter {
     }
 
    private:
+    /// RAII class for loop nesting counter
+    class LoopGuard {
+       public:
+        explicit LoopGuard(int& depth) : m_depth(depth) { ++m_depth; }
+
+        ~LoopGuard() { --m_depth; }
+
+       private:
+        int& m_depth;
+    };
     PopLObject Evaluate(const Expr& expr) const {
         return visitExpr(expr, *this);
     }
@@ -124,17 +133,17 @@ class Interpreter {
             throw runtime::RunTimeError(op, "Use of Uninitialized value");
     }
     void ExecuteBlock(const std::vector<Stmt>& stmts, Environment* newEnv) {
-        Environment* previous = m_environment;
+        Environment* previous = environment;
         try {
-            m_environment = newEnv;
+            environment = newEnv;
             for (const auto& stmt : stmts) {
                 Execute(stmt);
             }
         } catch (...) {
-            m_environment = previous;
+            environment = previous;
             throw;
         }
-        m_environment = previous;
+        environment = previous;
     }
 
     Token MakeReplReadToken(std::string_view what = "<repl>") const {
@@ -143,6 +152,8 @@ class Interpreter {
 
    private:
     Environment  m_global_environment{};
-    Environment* m_environment{&m_global_environment};
+    Environment* environment{&m_global_environment};
+    bool         m_repl_mode{false};
+    int          m_loop_depth{0};
 };
 };  // namespace popl
