@@ -49,10 +49,14 @@ struct BreakStmt {
     Token keyword;
 };
 
+struct ContinueStmt {
+    Token keyword;
+};
+
 struct Stmt {
     using Variant =
         std::variant<NilStmt, BlockStmt, ExpressionStmt, PrintStmt, VarStmt,
-                     AssignStmt, IfStmt, WhileStmt, BreakStmt>;
+                     AssignStmt, IfStmt, WhileStmt, BreakStmt, ContinueStmt>;
 
     Variant node;
 };
