@@ -17,7 +17,7 @@ declaration    -> varDecl | statement ;
 
 varDecl        -> "var" IDENTIFIER ( "=" expression )? ";" ;
 statement      -> assignment | exprStatement | printStatement | block | ifStatement 
-                  | whileStatement | forStatement;
+                  | whileStatement | forStatement | breakStatement;
 
 assignment     -> IDENTIFIER "=" expression ";" ;
 exprStatement  -> expression ";" ;
@@ -26,6 +26,7 @@ block          -> "{" declaration* "}" ;
 ifStatement    -> "if" "(" expression ")" statement ("else" statement)? ;
 whileStatement -> "while" "(" expression ")" statement ;
 forStatement   -> "for" "(" (varDecl | exprStatement | ";") expression? ";" expression? ")" statement;
+breakStatement -> "break";
 
 expression     -> comma ;
 comma          -> ternary ( "," ternary )* ;
