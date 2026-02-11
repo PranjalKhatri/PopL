@@ -70,6 +70,12 @@ class Interpreter {
         throw runtime::RunTimeError{
             stmt.keyword, "'break' statement can't be used outside of loops."};
     }
+    void operator()(const ContinueStmt& stmt) {
+        if (m_loop_depth > 0) throw runtime::control_flow::ContinueSignal{};
+        throw runtime::RunTimeError{
+            stmt.keyword,
+            "'continue' statement can't be used outside of loops."};
+    }
     /*
      * Expression visitor
      */
