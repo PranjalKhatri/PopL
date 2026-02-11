@@ -165,7 +165,8 @@ int main(int argc, char** argv) {
                     stmtBaseName, exprBaseName, stmtBaseName, stmtBaseName),
         std::format("While{}: {}* condition, {}* body", stmtBaseName,
                     exprBaseName, stmtBaseName),
-        std::format("Break{}: Token keyword", stmtBaseName)};
+        std::format("Break{}: Token keyword", stmtBaseName),
+        std::format("Continue{}: Token keyword", stmtBaseName)};
 
     DefineAst(exprBaseName, outputDir, ExprTypes);
     DefineAst(stmtBaseName, outputDir, StmtTypes);
