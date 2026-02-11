@@ -48,15 +48,15 @@ class Interpreter {
         PopLObject value{};
         if (!std::holds_alternative<NilExpr>(stmt.initializer->node))
             value = Evaluate(*(stmt.initializer));
-        environment->Define(stmt.name, value);
+        m_environment->Define(stmt.name, value);
     }
     void operator()(const BlockStmt& stmt) {
-        Environment blockEnv(environment);
+        Environment blockEnv(m_environment);
         ExecuteBlock(stmt.statements, &blockEnv);
     }
     void operator()(const AssignStmt& stmt) {
         PopLObject value{Evaluate(*(stmt.value))};
-        environment->Assign(stmt.name, value);
+        m_environment->Assign(stmt.name, value);
     }
     void operator()(const IfStmt& stmt) {
         if (Evaluate(*stmt.condition).isTruthy())
@@ -89,7 +89,7 @@ class Interpreter {
     PopLObject operator()(const UnaryExpr& expr) const;
     PopLObject operator()(const BinaryExpr& expr) const;
     PopLObject operator()(const VariableExpr& expr) const {
-        return environment->Get(expr.name);
+        return m_environment->Get(expr.name);
     }
     PopLObject operator()(const NilExpr& expr) const {
         return PopLObject{NilValue{}};
@@ -124,17 +124,17 @@ class Interpreter {
             throw runtime::RunTimeError(op, "Use of Uninitialized value");
     }
     void ExecuteBlock(const std::vector<Stmt>& stmts, Environment* newEnv) {
-        Environment* previous = environment;
+        Environment* previous = m_environment;
         try {
-            environment = newEnv;
+            m_environment = newEnv;
             for (const auto& stmt : stmts) {
                 Execute(stmt);
             }
         } catch (...) {
-            environment = previous;
+            m_environment = previous;
             throw;
         }
-        environment = previous;
+        m_environment = previous;
     }
 
     Token MakeReplReadToken(std::string_view what = "<repl>") const {
@@ -143,8 +143,6 @@ class Interpreter {
 
    private:
     Environment  m_global_environment{};
-    Environment* environment{&m_global_environment};
-    bool         m_repl_mode{false};
-    bool         m_in_loop{false}, m_break_flag{false};
+    Environment* m_environment{&m_global_environment};
 };
 };  // namespace popl
