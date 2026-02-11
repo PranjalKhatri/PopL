@@ -3,24 +3,16 @@
 namespace popl {
 
 void Interpreter::operator()(const WhileStmt& stmt) {
-    // store previous state
-    bool previousLoop  = m_in_loop;
-    bool previousBreak = m_break_flag;
-
-    m_in_loop    = true;
-    m_break_flag = false;
-
+    LoopGuard guard{m_loop_depth};
     while (Evaluate(*stmt.condition).isTruthy()) {
-        Execute(*stmt.body);
-        if (m_break_flag) {
-            // restore for nested loops to work
-            m_break_flag = false;
+        try {
+            Execute(*stmt.body);
+        } catch (const runtime::control_flow::ContinueSignal&) {
+            continue;
+        } catch (const runtime::control_flow::BreakSignal&) {
             break;
         }
     }
-    // restore to previous state
-    m_in_loop    = previousLoop;
-    m_break_flag = previousBreak;
 }
 
 PopLObject Interpreter::operator()(const UnaryExpr& expr) const {
