@@ -64,8 +64,11 @@ class Interpreter {
         else
             Execute(*stmt.elseBranch);
     }
-    void operator()(const WhileStmt& stmt) {
-        while (Evaluate(*stmt.condition).isTruthy()) Execute(*stmt.body);
+    void operator()(const WhileStmt& stmt);
+    void operator()(const BreakStmt& stmt) {
+        if (!m_in_loop)
+            throw RunTimeError(stmt.keyword, "'break' outside of any loop.");
+        m_break_flag = true;
     }
     /*
      * Expression visitor
@@ -141,5 +144,6 @@ class Interpreter {
     Environment  m_global_environment{};
     Environment* environment{&m_global_environment};
     bool         m_repl_mode{false};
+    bool         m_in_loop{false}, m_break_flag{false};
 };
 };  // namespace popl
