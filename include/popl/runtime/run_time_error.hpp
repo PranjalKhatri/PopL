@@ -4,7 +4,7 @@
 
 #include "popl/lexer/token.hpp"
 
-namespace popl {
+namespace popl::runtime {
 class RunTimeError : public std::runtime_error {
    public:
     RunTimeError(Token token, std::string message)
@@ -14,4 +14,4 @@ class RunTimeError : public std::runtime_error {
    private:
     Token m_token;
 };
-};  // namespace popl
+};  // namespace popl::runtime
