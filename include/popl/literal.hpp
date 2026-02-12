@@ -22,7 +22,7 @@ class PopLObject {
     using Value       = std::variant<UninitializedValue, NilValue, double,
                                      std::string, bool, CallablePtr>;
 
-    PopLObject() = default;  // Uninitialized
+    explicit PopLObject(UninitializedValue v) : m_data(v) {}
     explicit PopLObject(NilValue) : m_data{} {}
     explicit PopLObject(double d) : m_data(d) {}
     explicit PopLObject(bool b) : m_data(b) {}
