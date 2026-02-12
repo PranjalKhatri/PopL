@@ -41,8 +41,7 @@ class PopLObject {
     }
     bool isBool() const { return std::holds_alternative<bool>(m_data); }
     bool isCallable() const {
-        return std::holds_alternative<std::shared_ptr<callable::PoplCallable>>(
-            m_data);
+        return std::holds_alternative<CallablePtr>(m_data);
     }
 
     // accessors throws on misuse
