@@ -16,9 +16,9 @@ AlignConsecutiveBitFields:
   AcrossEmptyLines: false
   AcrossComments:  false
   AlignCompound:   false
-  AlignFunctionDeclarations: false
-  AlignFunctionPointers: false
-  PadOperators:    false
+  AlignFunctionDeclarations: true
+  AlignFunctionPointers: true
+  PadOperators:    true
 AlignConsecutiveDeclarations:
   Enabled:         true
   AcrossEmptyLines: false
@@ -28,13 +28,13 @@ AlignConsecutiveDeclarations:
   AlignFunctionPointers: true
   PadOperators:    true
 AlignConsecutiveMacros:
-  Enabled:         false
+  Enabled:         true
   AcrossEmptyLines: false
   AcrossComments:  false
   AlignCompound:   false
-  AlignFunctionDeclarations: false
-  AlignFunctionPointers: false
-  PadOperators:    false
+  AlignFunctionDeclarations: true
+  AlignFunctionPointers: true
+  PadOperators:    true
 AlignConsecutiveShortCaseStatements:
   Enabled:         true
   AcrossEmptyLines: true
@@ -42,29 +42,29 @@ AlignConsecutiveShortCaseStatements:
   AlignCaseArrows: true
   AlignCaseColons: true
 AlignConsecutiveTableGenBreakingDAGArgColons:
-  Enabled:         false
+  Enabled:         true
   AcrossEmptyLines: false
   AcrossComments:  false
   AlignCompound:   false
-  AlignFunctionDeclarations: false
+  AlignFunctionDeclarations: true
   AlignFunctionPointers: false
   PadOperators:    false
 AlignConsecutiveTableGenCondOperatorColons:
-  Enabled:         false
+  Enabled:         true
   AcrossEmptyLines: false
   AcrossComments:  false
   AlignCompound:   false
-  AlignFunctionDeclarations: false
+  AlignFunctionDeclarations: true
   AlignFunctionPointers: false
   PadOperators:    false
 AlignConsecutiveTableGenDefinitionColons:
-  Enabled:         false
+  Enabled:         true
   AcrossEmptyLines: false
-  AcrossComments:  false
-  AlignCompound:   false
-  AlignFunctionDeclarations: false
-  AlignFunctionPointers: false
-  PadOperators:    false
+  AcrossComments:  true
+  AlignCompound:   true
+  AlignFunctionDeclarations: true
+  AlignFunctionPointers: true
+  PadOperators:    true
 AlignEscapedNewlines: Left
 AlignOperands:   Align
 AlignTrailingComments:
