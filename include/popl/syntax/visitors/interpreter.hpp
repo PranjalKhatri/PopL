@@ -11,21 +11,24 @@ namespace popl {
 // TODO: Reason about environment pointer
 class Interpreter {
    public:
-    void Interpret(const std::vector<Stmt>& statements, bool replMode);
-
+    void         Interpret(const std::vector<Stmt>& statements, bool replMode);
+    Environment* GetGlobalEnvironment() { return &m_global_environment; }
+    void         ExecuteBlock(const std::vector<std::unique_ptr<Stmt>>& stmts,
+                              Environment*                              newEnv);
     /*
      * Statement visitor
      */
-    void operator()(const ExpressionStmt& stmt);
-    void operator()(const PrintStmt& stmt);
-    void operator()(const NilStmt& stmt);
-    void operator()(const VarStmt& stmt);
-    void operator()(const BlockStmt& stmt);
-    void operator()(const AssignStmt& stmt);
-    void operator()(const IfStmt& stmt);
-    void operator()(const WhileStmt& stmt);
-    void operator()(const BreakStmt& stmt);
-    void operator()(const ContinueStmt& stmt);
+    void         operator()(const ExpressionStmt& stmt);
+    void         operator()(const PrintStmt& stmt);
+    void         operator()(const NilStmt& stmt);
+    void         operator()(const VarStmt& stmt);
+    void         operator()(const BlockStmt& stmt);
+    void         operator()(const AssignStmt& stmt);
+    void         operator()(const IfStmt& stmt);
+    void         operator()(const WhileStmt& stmt);
+    void         operator()(const BreakStmt& stmt);
+    void         operator()(const ContinueStmt& stmt);
+    void         operator()(const FunctionStmt& stmt);
 
     /*
      * Expression visitor
@@ -57,7 +60,6 @@ class Interpreter {
     void  CheckNumberOperand(const Token& op, const PopLObject& left,
                              const PopLObject& right) const;
     void  CheckUninitialised(const Token& op, const PopLObject& value) const;
-    void  ExecuteBlock(const std::vector<Stmt>& stmts, Environment* newEnv);
     Token MakeReplReadToken(std::string_view what = "<repl>") const;
 
    private:

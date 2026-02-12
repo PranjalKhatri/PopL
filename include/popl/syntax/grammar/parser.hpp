@@ -65,6 +65,7 @@ class Parser {
 
     Stmt Statement();
     Stmt Declaration();
+    Stmt FunctionDeclaration(std::string_view kind);
     Stmt VarDeclaration();
     Stmt PrintStatement();
     Stmt ExpressionStatement();
@@ -74,7 +75,7 @@ class Parser {
     Stmt BreakStatement();
     Stmt ContinueStatement();
 
-    std::vector<Stmt> BlockStatement();
+    std::vector<std::unique_ptr<Stmt>> BlockStatement();
 
     Stmt     AssignmentStatement();
     Expr     Expression();
