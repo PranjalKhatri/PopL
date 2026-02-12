@@ -43,7 +43,7 @@ class Lexer {
     void ScanStringLiteral();
     void ScanNumberLiteral();
     void ScanIdentifier();
-    void AddToken(TokenType type) { AddToken(type, PopLObject{}); }
+    void AddToken(TokenType type) { AddToken(type, PopLObject{NilValue{}}); }
     void AddToken(TokenType type, PopLObject literal);
     char Advance() { return m_source.at(m_current++); }
 
