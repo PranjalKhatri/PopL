@@ -1,5 +1,14 @@
 #include "popl/syntax/visitors/interpreter.hpp"
 
+#include <format>
+#include <print>
+#include <variant>
+
+#include "popl/callable.hpp"
+#include "popl/diagnostics.hpp"
+#include "popl/literal.hpp"
+#include "popl/runtime/run_time_error.hpp"
+
 namespace popl {
 
 void Interpreter::Interpret(const std::vector<Stmt>& statements,
@@ -79,11 +88,11 @@ PopLObject Interpreter::operator()(const LiteralExpr& expr) const {
     return expr.value;
 }
 
-PopLObject Interpreter::operator()(const GroupingExpr& expr) const {
+PopLObject Interpreter::operator()(const GroupingExpr& expr) {
     return Evaluate(*expr.expression);
 }
 
-PopLObject Interpreter::operator()(const TernaryExpr& expr) const {
+PopLObject Interpreter::operator()(const TernaryExpr& expr) {
     PopLObject left = Evaluate(*expr.condition);
     CheckUninitialised(expr.question, left);
     if (left.isTruthy()) return Evaluate(*expr.thenBranch);
@@ -95,7 +104,7 @@ PopLObject Interpreter::operator()(const VariableExpr& expr) const {
 PopLObject Interpreter::operator()(const NilExpr& expr) const {
     return PopLObject{NilValue{}};
 }
-PopLObject Interpreter::operator()(const LogicalExpr& expr) const {
+PopLObject Interpreter::operator()(const LogicalExpr& expr) {
     auto left{Evaluate(*expr.left)};
     if (expr.op.GetType() == TokenType::OR) {
         if (left.isTruthy()) return left;
@@ -105,11 +114,25 @@ PopLObject Interpreter::operator()(const LogicalExpr& expr) const {
     return Evaluate(*expr.right);
 }
 
-PopLObject Interpreter::Evaluate(const Expr& expr) const {
+PopLObject Interpreter::operator()(const CallExpr& expr) {
+    PopLObject              callee{Evaluate(*expr.callee)};
+    std::vector<PopLObject> args;
+    for (const auto& expr : expr.arguments) args.emplace_back(Evaluate(expr));
+    if (!callee.isCallable())
+        throw runtime::RunTimeError(expr.ClosingParen,
+                                    "Can only call function and classes.");
+    PopLObject::CallablePtr func{callee.asCallable()};
+    if (func->GetArity() != args.size())
+        throw runtime::RunTimeError(
+            expr.ClosingParen, std::format("Expected {} arguments but got {}.",
+                                           func->GetArity(), args.size()));
+    return func->Call(*this, args);
+}
+PopLObject Interpreter::Evaluate(const Expr& expr) {
     return visitExpr(expr, *this);
 }
 
-PopLObject Interpreter::operator()(const UnaryExpr& expr) const {
+PopLObject Interpreter::operator()(const UnaryExpr& expr) {
     PopLObject right = Evaluate(*expr.right);
     CheckUninitialised(expr.op, right);
     switch (expr.op.GetType()) {
@@ -125,7 +148,7 @@ PopLObject Interpreter::operator()(const UnaryExpr& expr) const {
     return {};
 }
 
-PopLObject Interpreter::operator()(const BinaryExpr& expr) const {
+PopLObject Interpreter::operator()(const BinaryExpr& expr) {
     PopLObject left  = Evaluate(*expr.left);
     PopLObject right = Evaluate(*expr.right);
 

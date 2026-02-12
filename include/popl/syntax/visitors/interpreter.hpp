@@ -1,13 +1,8 @@
 #pragma once
 
-#include <print>
-#include <variant>
-
-#include "popl/diagnostics.hpp"
 #include "popl/environment.hpp"
 #include "popl/literal.hpp"
 #include "popl/runtime/control_flow.hpp"
-#include "popl/runtime/run_time_error.hpp"
 #include "popl/syntax/ast/expr.hpp"
 #include "popl/syntax/ast/stmt.hpp"
 
@@ -36,15 +31,14 @@ class Interpreter {
      * Expression visitor
      */
     PopLObject operator()(const LiteralExpr& expr) const;
-
-    PopLObject operator()(const GroupingExpr& expr) const;
-
-    PopLObject operator()(const TernaryExpr& expr) const;
-    PopLObject operator()(const UnaryExpr& expr) const;
-    PopLObject operator()(const BinaryExpr& expr) const;
+    PopLObject operator()(const GroupingExpr& expr);
+    PopLObject operator()(const TernaryExpr& expr);
+    PopLObject operator()(const UnaryExpr& expr);
+    PopLObject operator()(const BinaryExpr& expr);
     PopLObject operator()(const VariableExpr& expr) const;
     PopLObject operator()(const NilExpr& expr) const;
-    PopLObject operator()(const LogicalExpr& expr) const;
+    PopLObject operator()(const LogicalExpr& expr);
+    PopLObject operator()(const CallExpr& expr);
 
    private:
     /// RAII class for loop nesting counter
@@ -57,7 +51,7 @@ class Interpreter {
        private:
         int& m_depth;
     };
-    PopLObject Evaluate(const Expr& expr) const;
+    PopLObject Evaluate(const Expr& expr);
     void       Execute(const Stmt& stmt);
     void  CheckNumberOperand(const Token& op, const PopLObject& operand) const;
     void  CheckNumberOperand(const Token& op, const PopLObject& left,
