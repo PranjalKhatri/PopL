@@ -1,4 +1,5 @@
-
+#pragma once
+#include "popl/literal.hpp"
 
 namespace popl::runtime::control_flow {
 /// Act as signals through exceptions.
@@ -6,5 +7,10 @@ namespace popl::runtime::control_flow {
 /// not displayed to user.
 struct BreakSignal {};
 struct ContinueSignal {};
+
+/// ReturnSignal carries a value for `return`.
+struct ReturnSignal {
+    PopLObject value;
+};
 
 };  // namespace popl::runtime::control_flow
