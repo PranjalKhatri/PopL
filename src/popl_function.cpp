@@ -11,7 +11,11 @@ PopLObject PoplFunction::Call(Interpreter&                   interpreter,
     for (size_t i = 0; i < m_declaration.params.size(); ++i) {
         localEnv.Define(m_declaration.params[i], args[i]);
     }
-    interpreter.ExecuteBlock(m_declaration.body, &localEnv);
+    try {
+        interpreter.ExecuteBlock(m_declaration.body, &localEnv);
+    } catch (const runtime::control_flow::ReturnSignal& returnValue) {
+        return returnValue.value;
+    }
     return PopLObject{NilValue()};
 }
 };  // namespace popl::callable
