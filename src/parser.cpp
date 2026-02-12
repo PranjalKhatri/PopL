@@ -43,17 +43,18 @@ Stmt Parser::FunctionDeclaration(std::string_view kind) {
     Consume(TokenType::LEFT_BRACE,
             std::format("Expect '{{' before {} body.", kind));
     auto body{BlockStatement()};
-    return Stmt{FunctionStmt{name, std::move(parameters), std::move(body)}};
+    return Stmt{
+        FunctionStmt{std::move(name), std::move(parameters), std::move(body)}};
 }
 
 Stmt Parser::VarDeclaration() {
     Token name = Consume(TokenType::IDENTIFIER, "Expect variable name.");
 
-    Expr initializer =
-        Match({TokenType::EQUAL}) ? Expression() : Expr{NilExpr{}};
+    std::unique_ptr<Expr> initializer =
+        Match({TokenType::EQUAL}) ? MakeExprPtr(Expression()) : nullptr;
 
     Consume(TokenType::SEMICOLON, "Expect ';' after variable declaration.");
-    return Stmt{VarStmt{name, MakeExprPtr(std::move(initializer))}};
+    return Stmt{VarStmt{std::move(name), std::move(initializer)}};
 }
 
 Stmt Parser::Statement() {
@@ -63,6 +64,7 @@ Stmt Parser::Statement() {
     if (Match({TokenType::PRINT})) return PrintStatement();
     if (Match({TokenType::BREAK})) return BreakStatement();
     if (Match({TokenType::CONTINUE})) return ContinueStatement();
+    if (Match({TokenType::RETURN})) return ReturnStatement();
     if (!IsAtEnd() && PeekNext().GetType() == TokenType::EQUAL &&
         Match({TokenType::IDENTIFIER}))
         return AssignmentStatement();
@@ -84,6 +86,12 @@ Stmt Parser::BreakStatement() {
 Stmt Parser::ContinueStatement() {
     Consume(TokenType::SEMICOLON, "Expect ; after 'continue'.");
     return Stmt{ContinueStmt{Previous()}};
+}
+Stmt Parser::ReturnStatement() {
+    Token keyword = Previous();
+    Expr  value = Check(TokenType::SEMICOLON) ? Expr{NilExpr{}} : Expression();
+    Consume(TokenType::SEMICOLON, "Expect ';' after return vaule.");
+    return Stmt{ReturnStmt{std::move(keyword), MakeExprPtr(std::move(value))}};
 }
 Stmt Parser::WhileStatement() {
     Consume(TokenType::LEFT_PAREN, "Expect '(' after 'while'.");
@@ -212,9 +220,10 @@ Expr Parser::Ternary() {
         Token colon =
             Consume(TokenType::COLON, "No matching ':' for '?' found");
         Expr right = Ternary();
-        expr.node.emplace<TernaryExpr>(MakeExprPtr(std::move(expr)), question,
-                                       MakeExprPtr(std::move(middle)), colon,
-                                       MakeExprPtr(std::move(right)));
+        expr.node.emplace<TernaryExpr>(
+            MakeExprPtr(std::move(expr)), std::move(question),
+            MakeExprPtr(std::move(middle)), std::move(colon),
+            MakeExprPtr(std::move(right)));
     }
     return expr;
 }
@@ -271,7 +280,8 @@ CallExpr Parser::FinishCall(Expr callee) {
 Expr Parser::Primary() {
     if (Match({TokenType::FALSE})) return Expr{LiteralExpr{PopLObject{false}}};
     if (Match({TokenType::TRUE})) return Expr{LiteralExpr{PopLObject{true}}};
-    if (Match({TokenType::NIL})) return Expr{LiteralExpr{PopLObject{}}};
+    if (Match({TokenType::NIL}))
+        return Expr{LiteralExpr{PopLObject{NilValue{}}}};
 
     if (Match({TokenType::NUMBER, TokenType::STRING})) {
         return Expr{LiteralExpr(Previous().GetLiteral())};

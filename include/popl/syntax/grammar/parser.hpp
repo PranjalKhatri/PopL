@@ -74,6 +74,7 @@ class Parser {
     Stmt ForStatement();
     Stmt BreakStatement();
     Stmt ContinueStatement();
+    Stmt ReturnStatement();
     Stmt AssignmentStatement();
 
     std::vector<std::unique_ptr<Stmt>> BlockStatement();
