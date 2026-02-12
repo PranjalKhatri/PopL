@@ -53,10 +53,16 @@ struct ContinueStmt {
     Token keyword;
 };
 
+struct FunctionStmt {
+    Token              name;
+    std::vector<Token> params;
+    std::vector<Stmt>  body;
+};
+
 struct Stmt {
-    using Variant =
-        std::variant<NilStmt, BlockStmt, ExpressionStmt, PrintStmt, VarStmt,
-                     AssignStmt, IfStmt, WhileStmt, BreakStmt, ContinueStmt>;
+    using Variant = std::variant<NilStmt, BlockStmt, ExpressionStmt, PrintStmt,
+                                 VarStmt, AssignStmt, IfStmt, WhileStmt,
+                                 BreakStmt, ContinueStmt, FunctionStmt>;
 
     Variant node;
 };

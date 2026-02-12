@@ -13,8 +13,11 @@ operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
 
 ---------------------------------------------------------------------------
 program           -> declaration* EOF ;
-declaration       -> varDecl | statement ;
+declaration       -> varDecl | statement | funcDecl;
 
+funcDecl          -> "fun" function;
+function          -> IDENTIFIER "(" parameters? ")" block ;
+parameters        -> IDENTIFIER ( "," IDENTIFIER ) ;
 varDecl           -> "var" IDENTIFIER ( "=" expression )? ";" ;
 statement         -> assignment | exprStatement | printStatement | block | ifStatement 
                      | whileStatement | forStatement | breakStatement | continueStatement;

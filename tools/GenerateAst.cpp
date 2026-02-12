@@ -157,7 +157,8 @@ int main(int argc, char** argv) {
 
     std::string              stmtBaseName{"Stmt"};
     std::vector<std::string> StmtTypes = {
-        std::format("Block{}: std::vector<Stmt> statements", stmtBaseName),
+        std::format("Block{}: std::vector<{}> statements", stmtBaseName,
+                    stmtBaseName),
         std::format("Expression{}: {}* expression", stmtBaseName, exprBaseName),
         std::format("Print{}: {}* expression", stmtBaseName, exprBaseName),
         std::format("Var{}: Token name, {}* initializer", stmtBaseName,
@@ -169,7 +170,11 @@ int main(int argc, char** argv) {
         std::format("While{}: {}* condition, {}* body", stmtBaseName,
                     exprBaseName, stmtBaseName),
         std::format("Break{}: Token keyword", stmtBaseName),
-        std::format("Continue{}: Token keyword", stmtBaseName)};
+        std::format("Continue{}: Token keyword", stmtBaseName),
+        std::format("Function{}: Token name, std::vector<Token> params, "
+                    "std::vector<{}> body",
+                    stmtBaseName, stmtBaseName),
+    };
 
     DefineAst(exprBaseName, outputDir, ExprTypes);
     DefineAst(stmtBaseName, outputDir, StmtTypes);
