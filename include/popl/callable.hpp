@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <vector>
 
 namespace popl {
@@ -17,6 +18,8 @@ class PoplCallable {
 
     virtual PopLObject Call(Interpreter&                   interpreter,
                             const std::vector<PopLObject>& args) = 0;
+
+    virtual std::string ToString() const = 0;
 };
 
 }  // namespace callable
