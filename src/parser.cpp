@@ -202,6 +202,8 @@ Expr Parser::Expression() { return Comma(); }
 Expr Parser::Comma() {
     return ParseBinary(&Parser::Ternary, {TokenType::COMMA});
 }
+Expr Parser::ArgumentExpression() { return Ternary(); }
+
 Expr Parser::Ternary() {
     Expr expr = OrExpression();
     if (Match({TokenType::QUESTION})) {
@@ -258,7 +260,7 @@ CallExpr Parser::FinishCall(Expr callee) {
     std::vector<std::unique_ptr<Expr>> arguments;
     if (!Check(TokenType::RIGHT_PAREN)) {
         do {
-            arguments.emplace_back(MakeExprPtr(Expression()));
+            arguments.emplace_back(MakeExprPtr(ArgumentExpression()));
         } while (Match({TokenType::COMMA}));
     }
     Token paren =

@@ -74,12 +74,13 @@ class Parser {
     Stmt ForStatement();
     Stmt BreakStatement();
     Stmt ContinueStatement();
+    Stmt AssignmentStatement();
 
     std::vector<std::unique_ptr<Stmt>> BlockStatement();
 
-    Stmt     AssignmentStatement();
     Expr     Expression();
     Expr     Comma();
+    Expr     ArgumentExpression();
     Expr     Ternary();
     Expr     OrExpression();
     Expr     AndExpression();
