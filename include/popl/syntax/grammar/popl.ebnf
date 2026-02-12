@@ -1,17 +1,3 @@
-Ambigous grammar is difficult to parse.
-expression     → literal
-               | unary
-               | binary
-               | grouping ;
-
-literal        → NUMBER | STRING | "true" | "false" | "nil" ;
-grouping       → "(" expression ")" ;
-unary          → ( "-" | "!" ) expression ;
-binary         → expression operator expression ;
-operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
-               | "+"  | "-"  | "*" | "/" ;
-
----------------------------------------------------------------------------
 program           -> declaration* EOF ;
 declaration       -> varDecl | statement | funcDecl;
 
@@ -20,7 +6,7 @@ function          -> IDENTIFIER "(" parameters? ")" block ;
 parameters        -> IDENTIFIER ( "," IDENTIFIER ) ;
 varDecl           -> "var" IDENTIFIER ( "=" expression )? ";" ;
 statement         -> assignment | exprStatement | printStatement | block | ifStatement 
-                     | whileStatement | forStatement | breakStatement | continueStatement;
+                     | whileStatement | forStatement | breakStatement | continueStatement | returnStatement ;
 
 assignment        -> IDENTIFIER "=" expression ";" ;
 exprStatement     -> expression ";" ;
@@ -31,6 +17,7 @@ whileStatement    -> "while" "(" expression ")" statement ;
 forStatement      -> "for" "(" (varDecl | exprStatement | ";") expression? ";" expression? ")" statement;
 breakStatement    -> "break" ";" ;
 continueStatement -> "continue" ";" ; 
+returnStatement   -> "return" expression? ";" ;
 
 expression        -> comma ;
 comma             -> ternary ( "," ternary )* ;

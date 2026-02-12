@@ -147,7 +147,8 @@ int main(int argc, char** argv) {
         std::format("Grouping{}: {}* expression", exprBaseName, exprBaseName),
         std::format("Literal{}: PopLObject value", exprBaseName),
         std::format("Unary{}: Token op, {}* right", exprBaseName, exprBaseName),
-        std::format("Call{} : {}* callee, Token ClosingParen, std::vector<{}*> "
+        std::format("Call{} : {}* callee, Token ClosingParen, "
+                    "std::vector<std::unique_ptr<{}>> "
                     "arguments",
                     exprBaseName, exprBaseName, exprBaseName),
         std::format("Variable{}: Token name", exprBaseName),
@@ -157,8 +158,8 @@ int main(int argc, char** argv) {
 
     std::string              stmtBaseName{"Stmt"};
     std::vector<std::string> StmtTypes = {
-        std::format("Block{}: std::vector<{}*> statements", stmtBaseName,
-                    stmtBaseName),
+        std::format("Block{}: std::vector<std::unique_ptr<{}>> statements",
+                    stmtBaseName, stmtBaseName),
         std::format("Expression{}: {}* expression", stmtBaseName, exprBaseName),
         std::format("Print{}: {}* expression", stmtBaseName, exprBaseName),
         std::format("Var{}: Token name, {}* initializer", stmtBaseName,
@@ -172,9 +173,10 @@ int main(int argc, char** argv) {
         std::format("Break{}: Token keyword", stmtBaseName),
         std::format("Continue{}: Token keyword", stmtBaseName),
         std::format("Function{}: Token name, std::vector<Token> params, "
-                    "std::vector<{}*> body",
+                    "std::vector<std::unique_ptr<{}>> body",
                     stmtBaseName, stmtBaseName),
-    };
+        std::format("Return{}: Token keyword, {}* value", stmtBaseName,
+                    exprBaseName)};
 
     DefineAst(exprBaseName, outputDir, ExprTypes);
     DefineAst(stmtBaseName, outputDir, StmtTypes);
