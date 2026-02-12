@@ -104,38 +104,49 @@ Stmt Parser::WhileStatement() {
 Stmt Parser::ForStatement() {
     Consume(TokenType::LEFT_PAREN, "Expect '(' after 'for'.");
 
-    Stmt initializer = Match({TokenType::SEMICOLON})
-                           ? Stmt{NilStmt{}}
-                           : (Match({TokenType::VAR}) ? VarDeclaration()
-                                                      : ExpressionStatement());
+    std::unique_ptr<Stmt> initializer;
+    if (!Match({TokenType::SEMICOLON})) {
+        if (Match({TokenType::VAR}))
+            initializer = MakeStmtPtr(VarDeclaration());
+        else
+            initializer = MakeStmtPtr(ExpressionStatement());
+    }
 
-    Expr condition =
-        Check(TokenType::SEMICOLON) ? Expr{NilExpr{}} : Expression();
+    std::unique_ptr<Expr> condition;
+    if (!Check(TokenType::SEMICOLON)) {
+        condition = MakeExprPtr(Expression());
+    } else {
+        condition = nullptr;
+    }
     Consume(TokenType::SEMICOLON, "Expect ';' after loop condition.");
 
-    Expr increment =
-        Check(TokenType::RIGHT_PAREN) ? Expr{NilExpr{}} : Expression();
+    std::unique_ptr<Expr> increment;
+    if (!Check(TokenType::RIGHT_PAREN)) increment = MakeExprPtr(Expression());
+
     Consume(TokenType::RIGHT_PAREN, "Expect ')' after for clauses.");
 
     Stmt body = Statement();
 
-    if (!std::holds_alternative<NilExpr>(increment.node)) {
+    // attach increment
+    if (increment) {
         std::vector<std::unique_ptr<Stmt>> stmts;
-        stmts.emplace_back(MakeStmtPtr(std::move(body)));
-        stmts.emplace_back(MakeStmtPtr(
-            Stmt{ExpressionStmt{MakeExprPtr(std::move(increment))}}));
+        stmts.push_back(MakeStmtPtr(std::move(body)));
+        stmts.push_back(
+            MakeStmtPtr(Stmt{ExpressionStmt{std::move(increment)}}));
         body.node = BlockStmt{std::move(stmts)};
     }
-    if (std::holds_alternative<NilExpr>(condition.node))
-        condition.node = LiteralExpr{PopLObject{true}};
 
-    body.node = WhileStmt{MakeExprPtr(std::move(condition)),
-                          MakeStmtPtr(std::move(body))};
+    if (!condition) {
+        condition = MakeExprPtr(Expr{LiteralExpr{PopLObject{true}}});
+    }
 
-    if (!std::holds_alternative<NilStmt>(initializer.node)) {
+    body.node = WhileStmt{std::move(condition), MakeStmtPtr(std::move(body))};
+
+    // attach initializer
+    if (initializer) {
         std::vector<std::unique_ptr<Stmt>> stmts;
-        stmts.emplace_back(MakeStmtPtr(std::move(initializer)));
-        stmts.emplace_back(MakeStmtPtr(std::move(body)));
+        stmts.push_back(std::move(initializer));
+        stmts.push_back(MakeStmtPtr(std::move(body)));
         body.node = BlockStmt{std::move(stmts)};
     }
 
