@@ -2,6 +2,7 @@
 
 #include "popl/environment.hpp"
 #include "popl/literal.hpp"
+#include "popl/runtime/control_flow.hpp"
 #include "popl/syntax/visitors/interpreter.hpp"
 
 namespace popl::callable {
