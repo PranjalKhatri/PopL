@@ -3,7 +3,6 @@
 #include <format>
 #include <memory>
 #include <print>
-#include <variant>
 
 #include "popl/callable.hpp"
 #include "popl/diagnostics.hpp"
@@ -42,9 +41,8 @@ void Interpreter::operator()(const NilStmt& stmt) {
     // Yeah.. do nothing
 }
 void Interpreter::operator()(const VarStmt& stmt) {
-    PopLObject value{};
-    if (!std::holds_alternative<NilExpr>(stmt.initializer->node))
-        value = Evaluate(*(stmt.initializer));
+    PopLObject value{UninitializedValue{}};
+    if (stmt.initializer) value = Evaluate(*(stmt.initializer));
     environment->Define(stmt.name, value);
 }
 void Interpreter::operator()(const BlockStmt& stmt) {
@@ -70,6 +68,10 @@ void Interpreter::operator()(const ContinueStmt& stmt) {
     if (m_loop_depth > 0) throw runtime::control_flow::ContinueSignal{};
     throw runtime::RunTimeError{
         stmt.keyword, "'continue' statement can't be used outside of loops."};
+}
+void Interpreter::operator()(const ReturnStmt& stmt) {
+    auto value = stmt.value ? PopLObject{NilValue{}} : Evaluate(*stmt.value);
+    throw runtime::control_flow::ReturnSignal{std::move(value)};
 }
 
 void Interpreter::operator()(WhileStmt& stmt) {
@@ -153,7 +155,7 @@ PopLObject Interpreter::operator()(const UnaryExpr& expr) {
             break;
     }
     // Unreachable
-    return {};
+    return PopLObject{NilValue{}};
 }
 
 PopLObject Interpreter::operator()(const BinaryExpr& expr) {
@@ -205,7 +207,7 @@ PopLObject Interpreter::operator()(const BinaryExpr& expr) {
             break;
     }
     // Unreachable
-    return {};
+    return PopLObject{NilValue{}};
 }
 void Interpreter::Execute(Stmt& stmt) { visitStmt(stmt, *this); }
 
@@ -225,7 +227,8 @@ void Interpreter::CheckUninitialised(const Token&      op,
         throw runtime::RunTimeError(op, "Use of Uninitialized value");
 }
 Token Interpreter::MakeReplReadToken(std::string_view what) const {
-    return Token{TokenType::IDENTIFIER, std::string(what), {}, 1};
+    return Token{TokenType::IDENTIFIER, std::string(what),
+                 PopLObject{NilValue{}}, 1};
 }
 void Interpreter::ExecuteBlock(const std::vector<std::unique_ptr<Stmt>>& stmts,
                                Environment* newEnv) {

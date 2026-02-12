@@ -28,6 +28,7 @@ class Interpreter {
     void         operator()(WhileStmt& stmt);
     void         operator()(const BreakStmt& stmt);
     void         operator()(const ContinueStmt& stmt);
+    void         operator()(const ReturnStmt& stmt);
     void         operator()(FunctionStmt& stmt);
 
     /*
