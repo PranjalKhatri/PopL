@@ -2,7 +2,6 @@
 
 #include "popl/environment.hpp"
 #include "popl/literal.hpp"
-#include "popl/runtime/control_flow.hpp"
 #include "popl/syntax/ast/expr.hpp"
 #include "popl/syntax/ast/stmt.hpp"
 
@@ -45,16 +44,6 @@ class Interpreter {
     PopLObject operator()(const CallExpr& expr);
 
    private:
-    /// RAII class for loop nesting counter
-    class LoopGuard {
-       public:
-        explicit LoopGuard(int& depth) : m_depth(depth) { ++m_depth; }
-
-        ~LoopGuard() { --m_depth; }
-
-       private:
-        int& m_depth;
-    };
     PopLObject Evaluate(const Expr& expr);
     void       Execute(Stmt& stmt);
     void  CheckNumberOperand(const Token& op, const PopLObject& operand) const;
@@ -67,6 +56,5 @@ class Interpreter {
     Environment  m_global_environment{};
     Environment* environment{&m_global_environment};
     bool         m_repl_mode{false};
-    int          m_loop_depth{0};
 };
 };  // namespace popl

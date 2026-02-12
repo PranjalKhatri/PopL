@@ -1,7 +1,6 @@
 #include "popl/syntax/grammar/parser.hpp"
 
 #include <memory>
-#include <variant>
 #include <vector>
 
 #include "popl/lexer/token_types.hpp"
@@ -42,6 +41,9 @@ Stmt Parser::FunctionDeclaration(std::string_view kind) {
     Consume(TokenType::RIGHT_PAREN, "Expect ')' after parameters.");
     Consume(TokenType::LEFT_BRACE,
             std::format("Expect '{{' before {} body.", kind));
+
+    DepthGuard guard{m_function_depth};
+
     auto body{BlockStatement()};
     return Stmt{
         FunctionStmt{std::move(name), std::move(parameters), std::move(body)}};
@@ -80,14 +82,23 @@ std::vector<std::unique_ptr<Stmt>> Parser::BlockStatement() {
     return statements;
 }
 Stmt Parser::BreakStatement() {
+    if (m_loop_depth == 0) {
+        throw Error(Previous(), "Cannot use 'break' outside of a loop.");
+    }
     Consume(TokenType::SEMICOLON, "Expect ; after 'break'.");
     return Stmt{BreakStmt{Previous()}};
 }
 Stmt Parser::ContinueStatement() {
+    if (m_loop_depth == 0)
+        throw Error(Previous(), "Cannot use 'continue' outside of a loop.");
+
     Consume(TokenType::SEMICOLON, "Expect ; after 'continue'.");
     return Stmt{ContinueStmt{Previous()}};
 }
 Stmt Parser::ReturnStatement() {
+    if (m_function_depth == 0)
+        throw Error(Previous(), "Cannot return from top-level code.");
+
     Token keyword = Previous();
     Expr  value = Check(TokenType::SEMICOLON) ? Expr{NilExpr{}} : Expression();
     Consume(TokenType::SEMICOLON, "Expect ';' after return vaule.");
@@ -97,9 +108,12 @@ Stmt Parser::WhileStatement() {
     Consume(TokenType::LEFT_PAREN, "Expect '(' after 'while'.");
     Expr condition = Expression();
     Consume(TokenType::RIGHT_PAREN, "Expect ')' after condition.");
-    Stmt thenBranch = Statement();
+
+    DepthGuard guard(m_loop_depth);
+
+    Stmt body = Statement();
     return Stmt{WhileStmt{MakeExprPtr(std::move(condition)),
-                          MakeStmtPtr(std::move(thenBranch))}};
+                          MakeStmtPtr(std::move(body))}};
 }
 Stmt Parser::ForStatement() {
     Consume(TokenType::LEFT_PAREN, "Expect '(' after 'for'.");
@@ -124,6 +138,8 @@ Stmt Parser::ForStatement() {
     if (!Check(TokenType::RIGHT_PAREN)) increment = MakeExprPtr(Expression());
 
     Consume(TokenType::RIGHT_PAREN, "Expect ')' after for clauses.");
+
+    DepthGuard guard(m_loop_depth);
 
     Stmt body = Statement();
 

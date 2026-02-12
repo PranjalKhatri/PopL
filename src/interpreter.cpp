@@ -9,6 +9,7 @@
 #include "popl/lexer/token_types.hpp"
 #include "popl/literal.hpp"
 #include "popl/popl_function.hpp"
+#include "popl/runtime/control_flow.hpp"
 #include "popl/runtime/run_time_error.hpp"
 #include "popl/syntax/ast/stmt.hpp"
 
@@ -60,14 +61,10 @@ void Interpreter::operator()(IfStmt& stmt) {
         Execute(*stmt.elseBranch);
 }
 void Interpreter::operator()(const BreakStmt& stmt) {
-    if (m_loop_depth > 0) throw runtime::control_flow::BreakSignal{};
-    throw runtime::RunTimeError{
-        stmt.keyword, "'break' statement can't be used outside of loops."};
+    throw runtime::control_flow::BreakSignal{};
 }
 void Interpreter::operator()(const ContinueStmt& stmt) {
-    if (m_loop_depth > 0) throw runtime::control_flow::ContinueSignal{};
-    throw runtime::RunTimeError{
-        stmt.keyword, "'continue' statement can't be used outside of loops."};
+    throw runtime::control_flow::ContinueSignal{};
 }
 void Interpreter::operator()(const ReturnStmt& stmt) {
     auto value = stmt.value ? Evaluate(*stmt.value) : PopLObject{NilValue{}};
@@ -75,7 +72,6 @@ void Interpreter::operator()(const ReturnStmt& stmt) {
 }
 
 void Interpreter::operator()(WhileStmt& stmt) {
-    LoopGuard guard{m_loop_depth};
     while (Evaluate(*stmt.condition).isTruthy()) {
         try {
             Execute(*stmt.body);
