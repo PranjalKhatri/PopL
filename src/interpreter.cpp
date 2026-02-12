@@ -1,13 +1,16 @@
 #include "popl/syntax/visitors/interpreter.hpp"
 
 #include <format>
+#include <memory>
 #include <print>
 #include <variant>
 
 #include "popl/callable.hpp"
 #include "popl/diagnostics.hpp"
 #include "popl/literal.hpp"
+#include "popl/popl_function.hpp"
 #include "popl/runtime/run_time_error.hpp"
+#include "popl/syntax/ast/stmt.hpp"
 
 namespace popl {
 
@@ -81,6 +84,11 @@ void Interpreter::operator()(const WhileStmt& stmt) {
         }
     }
 }
+void Interpreter::operator()(const FunctionStmt& stmt) {
+    // auto func = std::make_shared<callable::PoplFunction>(std::move(stmt));
+
+    // environment->Define(stmt.name, PopLObject{func});
+}
 /*
  * Expression visitor
  */
@@ -117,7 +125,7 @@ PopLObject Interpreter::operator()(const LogicalExpr& expr) {
 PopLObject Interpreter::operator()(const CallExpr& expr) {
     PopLObject              callee{Evaluate(*expr.callee)};
     std::vector<PopLObject> args;
-    for (const auto& expr : expr.arguments) args.emplace_back(Evaluate(expr));
+    for (const auto& expr : expr.arguments) args.emplace_back(Evaluate(*expr));
     if (!callee.isCallable())
         throw runtime::RunTimeError(expr.ClosingParen,
                                     "Can only call function and classes.");
@@ -217,13 +225,13 @@ void Interpreter::CheckUninitialised(const Token&      op,
 Token Interpreter::MakeReplReadToken(std::string_view what) const {
     return Token{TokenType::IDENTIFIER, std::string(what), {}, 1};
 }
-void Interpreter::ExecuteBlock(const std::vector<Stmt>& stmts,
-                               Environment*             newEnv) {
+void Interpreter::ExecuteBlock(const std::vector<std::unique_ptr<Stmt>>& stmts,
+                               Environment* newEnv) {
     Environment* previous = environment;
     try {
         environment = newEnv;
         for (const auto& stmt : stmts) {
-            Execute(stmt);
+            Execute(*stmt);
         }
     } catch (...) {
         environment = previous;

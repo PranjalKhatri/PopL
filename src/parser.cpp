@@ -19,11 +19,31 @@ std::vector<Stmt> Parser::Parse() {
 Stmt Parser::Declaration() {
     try {
         if (Match({TokenType::VAR})) return VarDeclaration();
+        if (Match({TokenType::FUN})) return FunctionDeclaration("function");
         return Statement();
     } catch (const ParseError& error) {
         Synchronize();
         return Stmt{NilStmt()};
     }
+}
+
+Stmt Parser::FunctionDeclaration(std::string_view kind) {
+    Token name =
+        Consume(TokenType::IDENTIFIER, std::format("Expect {} name.", kind));
+    Consume(TokenType::LEFT_PAREN,
+            std::format("Expect '(' after {} name.", kind));
+    std::vector<Token> parameters;
+    if (!Check(TokenType::RIGHT_PAREN)) {
+        do {
+            parameters.emplace_back(
+                Consume(TokenType::IDENTIFIER, "Expect parameter name."));
+        } while (Match({TokenType::COMMA}));
+    }
+    Consume(TokenType::RIGHT_PAREN, "Expect ')' after parameters.");
+    Consume(TokenType::LEFT_BRACE,
+            std::format("Expect '{{' before {} body.", kind));
+    auto body{BlockStatement()};
+    return Stmt{FunctionStmt{name, std::move(parameters), std::move(body)}};
 }
 
 Stmt Parser::VarDeclaration() {
@@ -50,10 +70,10 @@ Stmt Parser::Statement() {
         return Stmt{BlockStmt{BlockStatement()}};
     return ExpressionStatement();
 }
-std::vector<Stmt> Parser::BlockStatement() {
-    std::vector<Stmt> statements;
+std::vector<std::unique_ptr<Stmt>> Parser::BlockStatement() {
+    std::vector<std::unique_ptr<Stmt>> statements;
     while (!Check(TokenType::RIGHT_BRACE) && !IsAtEnd())
-        statements.emplace_back(Declaration());
+        statements.emplace_back(MakeStmtPtr(Declaration()));
     Consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
     return statements;
 }
@@ -92,10 +112,10 @@ Stmt Parser::ForStatement() {
     Stmt body = Statement();
 
     if (!std::holds_alternative<NilExpr>(increment.node)) {
-        std::vector<Stmt> stmts;
-        stmts.push_back(std::move(body));
-        stmts.push_back(
-            Stmt{ExpressionStmt{MakeExprPtr(std::move(increment))}});
+        std::vector<std::unique_ptr<Stmt>> stmts;
+        stmts.emplace_back(MakeStmtPtr(std::move(body)));
+        stmts.emplace_back(MakeStmtPtr(
+            Stmt{ExpressionStmt{MakeExprPtr(std::move(increment))}}));
         body.node = BlockStmt{std::move(stmts)};
     }
     if (std::holds_alternative<NilExpr>(condition.node))
@@ -105,9 +125,9 @@ Stmt Parser::ForStatement() {
                           MakeStmtPtr(std::move(body))};
 
     if (!std::holds_alternative<NilStmt>(initializer.node)) {
-        std::vector<Stmt> stmts;
-        stmts.push_back(std::move(initializer));
-        stmts.push_back(std::move(body));
+        std::vector<std::unique_ptr<Stmt>> stmts;
+        stmts.emplace_back(MakeStmtPtr(std::move(initializer)));
+        stmts.emplace_back(MakeStmtPtr(std::move(body)));
         body.node = BlockStmt{std::move(stmts)};
     }
 
@@ -127,7 +147,7 @@ Stmt Parser::IfStatement() {
                        MakeStmtPtr(std::move(elseBranch))}};
 }
 Stmt Parser::PrintStatement() {
-    auto value = std::make_unique<Expr>(Expression());
+    auto value = MakeExprPtr(Expression());
     Consume(TokenType::SEMICOLON, "Expect ; after value.");
     return Stmt{PrintStmt{std::move(value)}};
 }
@@ -135,13 +155,13 @@ Stmt Parser::PrintStatement() {
 Stmt Parser::AssignmentStatement() {
     Token name = Previous();
     Consume(TokenType::EQUAL, "Expects = after an identifier name");
-    auto value{std::make_unique<Expr>(Expression())};
+    auto value{MakeExprPtr(Expression())};
     Consume(TokenType::SEMICOLON, "Expects ; after Assignments.");
     return Stmt{AssignStmt{std::move(name), std::move(value)}};
 }
 
 Stmt Parser::ExpressionStatement() {
-    auto expr = std::make_unique<Expr>(Expression());
+    auto expr = MakeExprPtr(Expression());
     Consume(TokenType::SEMICOLON, "Expect ; after value.");
     return Stmt{ExpressionStmt{std::move(expr)}};
 }
@@ -235,10 +255,10 @@ Expr Parser::CallExpression() {
     return expr;
 }
 CallExpr Parser::FinishCall(Expr callee) {
-    std::vector<Expr> arguments;
+    std::vector<std::unique_ptr<Expr>> arguments;
     if (!Check(TokenType::RIGHT_PAREN)) {
         do {
-            arguments.push_back(Expression());
+            arguments.emplace_back(MakeExprPtr(Expression()));
         } while (Match({TokenType::COMMA}));
     }
     Token paren =
