@@ -18,9 +18,9 @@ inline bool operator==(const NilValue&, const NilValue&) { return false; }
 
 class PopLObject {
    public:
-    using SPtrCallable = std::shared_ptr<callable::PoplCallable>;
-    using Value        = std::variant<UninitializedValue, NilValue, double,
-                                      std::string, bool, SPtrCallable>;
+    using CallablePtr = std::shared_ptr<callable::PoplCallable>;
+    using Value       = std::variant<UninitializedValue, NilValue, double,
+                                     std::string, bool, CallablePtr>;
 
     PopLObject() = default;  // Uninitialized
     explicit PopLObject(NilValue) : m_data{} {}
@@ -49,7 +49,8 @@ class PopLObject {
     const std::string& asString() const {
         return std::get<std::string>(m_data);
     }
-    bool asBool() const { return std::get<bool>(m_data); }
+    CallablePtr asCallable() const { return std::get<CallablePtr>(m_data); }
+    bool        asBool() const { return std::get<bool>(m_data); }
 
     bool isTruthy() const {
         if (isNil() || isUninitialized()) return false;
@@ -67,7 +68,7 @@ class PopLObject {
                     return "nil";
                 else if constexpr (std::is_same_v<T, bool>)
                     return v ? "true" : "false";
-                else if constexpr (std::is_same_v<T, SPtrCallable>)
+                else if constexpr (std::is_same_v<T, CallablePtr>)
                     return "PopLCallable()";
                 else if constexpr (std::is_same_v<T, double>) {
                     std::string s = std::to_string(v);
