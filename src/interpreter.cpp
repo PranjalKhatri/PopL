@@ -70,7 +70,7 @@ void Interpreter::operator()(const ContinueStmt& stmt) {
         stmt.keyword, "'continue' statement can't be used outside of loops."};
 }
 void Interpreter::operator()(const ReturnStmt& stmt) {
-    auto value = stmt.value ? PopLObject{NilValue{}} : Evaluate(*stmt.value);
+    auto value = stmt.value ? Evaluate(*stmt.value) : PopLObject{NilValue{}};
     throw runtime::control_flow::ReturnSignal{std::move(value)};
 }
 
@@ -87,9 +87,9 @@ void Interpreter::operator()(WhileStmt& stmt) {
     }
 }
 void Interpreter::operator()(FunctionStmt& stmt) {
-    auto func = std::make_shared<callable::PoplFunction>(std::move(stmt));
-
-    environment->Define(stmt.name, PopLObject{func});
+    Token name = stmt.name;
+    auto  func = std::make_shared<callable::PoplFunction>(std::move(stmt));
+    environment->Define(name, PopLObject{func});
 }
 /*
  * Expression visitor
