@@ -11,7 +11,7 @@ namespace popl {
 // TODO: Reason about environment pointer
 class Interpreter {
    public:
-    void         Interpret(const std::vector<Stmt>& statements, bool replMode);
+    void         Interpret(std::vector<Stmt>& statements, bool replMode);
     Environment* GetGlobalEnvironment() { return &m_global_environment; }
     void         ExecuteBlock(const std::vector<std::unique_ptr<Stmt>>& stmts,
                               Environment*                              newEnv);
@@ -24,11 +24,11 @@ class Interpreter {
     void         operator()(const VarStmt& stmt);
     void         operator()(const BlockStmt& stmt);
     void         operator()(const AssignStmt& stmt);
-    void         operator()(const IfStmt& stmt);
-    void         operator()(const WhileStmt& stmt);
+    void         operator()(IfStmt& stmt);
+    void         operator()(WhileStmt& stmt);
     void         operator()(const BreakStmt& stmt);
     void         operator()(const ContinueStmt& stmt);
-    void         operator()(const FunctionStmt& stmt);
+    void         operator()(FunctionStmt& stmt);
 
     /*
      * Expression visitor
@@ -55,7 +55,7 @@ class Interpreter {
         int& m_depth;
     };
     PopLObject Evaluate(const Expr& expr);
-    void       Execute(const Stmt& stmt);
+    void       Execute(Stmt& stmt);
     void  CheckNumberOperand(const Token& op, const PopLObject& operand) const;
     void  CheckNumberOperand(const Token& op, const PopLObject& left,
                              const PopLObject& right) const;
