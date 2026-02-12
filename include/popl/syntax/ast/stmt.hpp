@@ -13,7 +13,7 @@ struct Stmt;
 struct NilStmt {};
 
 struct BlockStmt {
-    std::vector<Stmt> statements;
+    std::vector<std::unique_ptr<Stmt>> statements;
 };
 
 struct ExpressionStmt {
@@ -54,9 +54,9 @@ struct ContinueStmt {
 };
 
 struct FunctionStmt {
-    Token              name;
-    std::vector<Token> params;
-    std::vector<Stmt>  body;
+    Token                              name;
+    std::vector<Token>                 params;
+    std::vector<std::unique_ptr<Stmt>> body;
 };
 
 struct Stmt {

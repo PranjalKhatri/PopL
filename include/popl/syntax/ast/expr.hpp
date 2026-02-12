@@ -40,9 +40,9 @@ struct UnaryExpr {
 };
 
 struct CallExpr {
-    std::unique_ptr<Expr> callee;
-    Token                 ClosingParen;
-    std::vector<Expr>     arguments;
+    std::unique_ptr<Expr>              callee;
+    Token                              ClosingParen;
+    std::vector<std::unique_ptr<Expr>> arguments;
 };
 
 struct VariableExpr {
