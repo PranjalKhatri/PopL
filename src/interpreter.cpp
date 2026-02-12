@@ -14,11 +14,10 @@
 
 namespace popl {
 
-void Interpreter::Interpret(const std::vector<Stmt>& statements,
-                            bool                     replMode) {
+void Interpreter::Interpret(std::vector<Stmt>& statements, bool replMode) {
     m_repl_mode = replMode;
     try {
-        for (const auto& statement : statements) {
+        for (auto& statement : statements) {
             Execute(statement);
         }
     } catch (const runtime::RunTimeError& error) {
@@ -55,7 +54,7 @@ void Interpreter::operator()(const AssignStmt& stmt) {
     PopLObject value{Evaluate(*(stmt.value))};
     environment->Assign(stmt.name, value);
 }
-void Interpreter::operator()(const IfStmt& stmt) {
+void Interpreter::operator()(IfStmt& stmt) {
     if (Evaluate(*stmt.condition).isTruthy())
         Execute(*stmt.thenBranch);
     else
@@ -72,7 +71,7 @@ void Interpreter::operator()(const ContinueStmt& stmt) {
         stmt.keyword, "'continue' statement can't be used outside of loops."};
 }
 
-void Interpreter::operator()(const WhileStmt& stmt) {
+void Interpreter::operator()(WhileStmt& stmt) {
     LoopGuard guard{m_loop_depth};
     while (Evaluate(*stmt.condition).isTruthy()) {
         try {
@@ -84,10 +83,10 @@ void Interpreter::operator()(const WhileStmt& stmt) {
         }
     }
 }
-void Interpreter::operator()(const FunctionStmt& stmt) {
-    // auto func = std::make_shared<callable::PoplFunction>(std::move(stmt));
+void Interpreter::operator()(FunctionStmt& stmt) {
+    auto func = std::make_shared<callable::PoplFunction>(std::move(stmt));
 
-    // environment->Define(stmt.name, PopLObject{func});
+    environment->Define(stmt.name, PopLObject{func});
 }
 /*
  * Expression visitor
@@ -205,7 +204,7 @@ PopLObject Interpreter::operator()(const BinaryExpr& expr) {
     // Unreachable
     return {};
 }
-void Interpreter::Execute(const Stmt& stmt) { visitStmt(stmt, *this); }
+void Interpreter::Execute(Stmt& stmt) { visitStmt(stmt, *this); }
 
 void Interpreter::CheckNumberOperand(const Token&      op,
                                      const PopLObject& operand) const {
