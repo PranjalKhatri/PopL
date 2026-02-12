@@ -7,6 +7,7 @@
 
 #include "popl/callable.hpp"
 #include "popl/diagnostics.hpp"
+#include "popl/lexer/token_types.hpp"
 #include "popl/literal.hpp"
 #include "popl/popl_function.hpp"
 #include "popl/runtime/run_time_error.hpp"
@@ -198,6 +199,8 @@ PopLObject Interpreter::operator()(const BinaryExpr& expr) {
         case TokenType::STAR:
             CheckNumberOperand(expr.op, left, right);
             return PopLObject{left.asNumber() * right.asNumber()};
+        case TokenType::COMMA:
+            return right;
         default:
             break;
     }
