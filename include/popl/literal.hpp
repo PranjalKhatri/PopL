@@ -28,6 +28,7 @@ class PopLObject {
     explicit PopLObject(bool b) : m_data(b) {}
     explicit PopLObject(const std::string& str) : m_data(str) {}
     explicit PopLObject(std::string&& str) : m_data(std::move(str)) {}
+    explicit PopLObject(CallablePtr ptr) : m_data(ptr) {}
 
     // type checks
     bool isNil() const { return std::holds_alternative<NilValue>(m_data); }
@@ -68,9 +69,9 @@ class PopLObject {
                     return "nil";
                 else if constexpr (std::is_same_v<T, bool>)
                     return v ? "true" : "false";
-                else if constexpr (std::is_same_v<T, CallablePtr>)
-                    return "PopLCallable()";
-                else if constexpr (std::is_same_v<T, double>) {
+                else if constexpr (std::is_same_v<T, CallablePtr>) {
+                    return v ? v->ToString() : "<null callable>";
+                } else if constexpr (std::is_same_v<T, double>) {
                     std::string s = std::to_string(v);
                     s.erase(s.find_last_not_of('0') + 1);
                     if (s.back() == '.') s.pop_back();
