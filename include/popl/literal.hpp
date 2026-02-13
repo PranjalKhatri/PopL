@@ -23,7 +23,7 @@ class PopLObject {
                                      std::string, bool, CallablePtr>;
 
     explicit PopLObject(UninitializedValue v) : m_data(v) {}
-    explicit PopLObject(NilValue) : m_data{} {}
+    explicit PopLObject(NilValue n) : m_data{n} {}
     explicit PopLObject(double d) : m_data(d) {}
     explicit PopLObject(bool b) : m_data(b) {}
     explicit PopLObject(const std::string& str) : m_data(str) {}
