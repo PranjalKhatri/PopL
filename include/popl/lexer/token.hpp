@@ -23,10 +23,10 @@ class Token {
     friend struct std::formatter<Token>;
 
    private:
-    const TokenType    m_type;
-    const std::string  m_lexeme;
-    const PopLObject   m_literal;
-    const unsigned int m_line;
+    TokenType    m_type;
+    std::string  m_lexeme;
+    PopLObject   m_literal;
+    unsigned int m_line;
 };
 };  // namespace popl
 template <>
