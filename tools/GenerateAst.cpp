@@ -136,6 +136,7 @@ int main(int argc, char** argv) {
     }
 
     std::string exprBaseName{"Expr"};
+    std::string stmtBaseName{"Stmt"};
     std::string outputDir = argv[1];
 
     std::vector<std::string> ExprTypes = {
@@ -154,9 +155,10 @@ int main(int argc, char** argv) {
         std::format("Variable{}: Token name", exprBaseName),
         std::format("Logical{}: {}* left, Token op, {}* right", exprBaseName,
                     exprBaseName, exprBaseName),
-    };
+        std::format("Function{}: std::vector<Token> params, "
+                    "std::vector<std::unique_ptr<{}>> body",
+                    exprBaseName, stmtBaseName)};
 
-    std::string              stmtBaseName{"Stmt"};
     std::vector<std::string> StmtTypes = {
         std::format("Block{}: std::vector<std::unique_ptr<{}>> statements",
                     stmtBaseName, stmtBaseName),
@@ -172,9 +174,8 @@ int main(int argc, char** argv) {
                     exprBaseName, stmtBaseName),
         std::format("Break{}: Token keyword", stmtBaseName),
         std::format("Continue{}: Token keyword", stmtBaseName),
-        std::format("Function{}: Token name, std::vector<Token> params, "
-                    "std::vector<std::unique_ptr<{}>> body",
-                    stmtBaseName, stmtBaseName),
+        std::format("Function{}: Token name, std::unique_ptr<Function{}> func",
+                    stmtBaseName, exprBaseName),
         std::format("Return{}: Token keyword, {}* value", stmtBaseName,
                     exprBaseName)};
 
