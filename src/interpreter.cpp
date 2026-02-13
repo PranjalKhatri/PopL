@@ -2,6 +2,7 @@
 
 #include <format>
 #include <memory>
+#include <optional>
 #include <print>
 
 #include "popl/callable.hpp"
@@ -11,6 +12,7 @@
 #include "popl/popl_function.hpp"
 #include "popl/runtime/control_flow.hpp"
 #include "popl/runtime/run_time_error.hpp"
+#include "popl/syntax/ast/expr.hpp"
 #include "popl/syntax/ast/stmt.hpp"
 
 namespace popl {
@@ -84,10 +86,11 @@ void Interpreter::operator()(WhileStmt& stmt) {
 }
 void Interpreter::operator()(FunctionStmt& stmt) {
     Token name = stmt.name;
-    auto  func =
-        std::make_shared<callable::PoplFunction>(stmt, m_current_environment);
+    auto  func = std::make_shared<callable::PoplFunction>(
+        *stmt.func, m_current_environment, stmt.name.GetLexeme());
     m_current_environment->Define(name, PopLObject{func});
 }
+
 /*
  * Expression visitor
  */
@@ -135,6 +138,14 @@ PopLObject Interpreter::operator()(const CallExpr& expr) {
                                            func->GetArity(), args.size()));
     return func->Call(*this, args);
 }
+
+PopLObject Interpreter::operator()(const FunctionExpr& expr) {
+    auto function = std::make_shared<callable::PoplFunction>(
+        expr, m_current_environment, std::nullopt);
+
+    return PopLObject{function};
+}
+
 PopLObject Interpreter::Evaluate(const Expr& expr) {
     return visitExpr(expr, *this);
 }
