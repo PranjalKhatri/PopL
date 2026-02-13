@@ -30,7 +30,7 @@ void Interpreter::operator()(const ExpressionStmt& stmt) {
     PopLObject obj = Evaluate(*(stmt.expression));
     if (m_repl_mode) {
         CheckUninitialised(MakeReplReadToken(), obj);
-        std::println("{}", obj.toString());
+        std::println("Expression returned: {}", obj.toString());
     }
 }
 void Interpreter::operator()(const PrintStmt& stmt) {
@@ -84,8 +84,8 @@ void Interpreter::operator()(WhileStmt& stmt) {
 }
 void Interpreter::operator()(FunctionStmt& stmt) {
     Token name = stmt.name;
-    auto  func = std::make_shared<callable::PoplFunction>(std::move(stmt),
-                                                          m_current_environment);
+    auto  func =
+        std::make_shared<callable::PoplFunction>(stmt, m_current_environment);
     m_current_environment->Define(name, PopLObject{func});
 }
 /*
