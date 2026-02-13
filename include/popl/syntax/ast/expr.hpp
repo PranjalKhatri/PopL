@@ -9,6 +9,7 @@
 namespace popl {
 
 struct Expr;
+struct Stmt;
 
 struct NilExpr {};
 
@@ -55,10 +56,15 @@ struct LogicalExpr {
     std::unique_ptr<Expr> right;
 };
 
+struct FunctionExpr {
+    std::vector<Token>                 params;
+    std::vector<std::unique_ptr<Stmt>> body;
+};
+
 struct Expr {
     using Variant = std::variant<NilExpr, BinaryExpr, TernaryExpr, GroupingExpr,
                                  LiteralExpr, UnaryExpr, CallExpr, VariableExpr,
-                                 LogicalExpr>;
+                                 LogicalExpr, FunctionExpr>;
 
     Variant node;
 };

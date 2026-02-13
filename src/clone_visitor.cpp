@@ -63,6 +63,18 @@ struct ExprCloner {
             e.left ? std::make_unique<Expr>(Clone(*e.left)) : nullptr, e.op,
             e.right ? std::make_unique<Expr>(Clone(*e.right)) : nullptr}};
     }
+
+    Expr operator()(const FunctionExpr& e) const {
+        std::vector<std::unique_ptr<Stmt>> body;
+        body.reserve(e.body.size());
+
+        for (const auto& stmt : e.body) {
+            body.push_back(stmt ? std::make_unique<Stmt>(Clone(*stmt))
+                                : nullptr);
+        }
+
+        return Expr{FunctionExpr{e.params, std::move(body)}};
+    }
 };
 
 Expr Clone(const Expr& expr) { return visitExpr(expr, ExprCloner{}); }
@@ -128,14 +140,15 @@ struct StmtCloner {
 
     Stmt operator()(const FunctionStmt& s) const {
         std::vector<std::unique_ptr<Stmt>> body;
-        body.reserve(s.body.size());
+        body.reserve(s.func->body.size());
 
-        for (const auto& stmt : s.body) {
+        for (const auto& stmt : s.func->body) {
             body.push_back(stmt ? std::make_unique<Stmt>(Clone(*stmt))
                                 : nullptr);
         }
 
-        return Stmt{FunctionStmt{s.name, s.params, std::move(body)}};
+        return Stmt{FunctionStmt{s.name, make_unique<FunctionExpr>(
+                                             s.func->params, std::move(body))}};
     }
 
     Stmt operator()(const ReturnStmt& s) const {

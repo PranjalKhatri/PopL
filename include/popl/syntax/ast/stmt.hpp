@@ -54,9 +54,8 @@ struct ContinueStmt {
 };
 
 struct FunctionStmt {
-    Token                              name;
-    std::vector<Token>                 params;
-    std::vector<std::unique_ptr<Stmt>> body;
+    Token                         name;
+    std::unique_ptr<FunctionExpr> func;
 };
 
 struct ReturnStmt {
