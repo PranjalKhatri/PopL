@@ -21,4 +21,11 @@ PopLObject PoplFunction::Call(Interpreter&                   interpreter,
     }
     return PopLObject{NilValue{}};
 }
+
+std::string PoplFunction::ToString() const {
+    if (m_name) {
+        return std::format("<fn {} (arity:{})>", *m_name, GetArity());
+    }
+    return std::format("<fn anonymous (arity:{})>", GetArity());
+}
 };  // namespace popl::callable
