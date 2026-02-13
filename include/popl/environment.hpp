@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "popl/lexer/token.hpp"
 #include "popl/literal.hpp"
 #include "popl/runtime/run_time_error.hpp"
@@ -7,7 +9,8 @@
 namespace popl {
 class Environment {
    public:
-    Environment(Environment* enclosing) : m_enclosing(enclosing) {}
+    Environment(std::shared_ptr<Environment> enclosing)
+        : m_enclosing(std::move(enclosing)) {}
     Environment() = default;
     const PopLObject& Get(const Token& name) const { return Lookup(name); }
 
@@ -37,9 +40,9 @@ class Environment {
     }
 
    private:
-    // Non-owning pointer. Just a reference to the enclosing Environment, not
-    // managed by this object
-    Environment*                                m_enclosing{};
+    /// for a child to exist its parent must exist, therefore shared_ptr and not
+    /// weak_ptr
+    std::shared_ptr<Environment>                m_enclosing;
     std::unordered_map<std::string, PopLObject> m_values;
 };
 }  // namespace popl
