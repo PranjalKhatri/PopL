@@ -7,6 +7,7 @@ add_executable(PopL
                 parser.cpp
                 interpreter.cpp
                 popl_function.cpp
+                clone_visitor.cpp
 )
 
 target_include_directories(PopL
