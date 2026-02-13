@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "popl/environment.hpp"
 #include "popl/literal.hpp"
 #include "popl/syntax/ast/expr.hpp"
@@ -10,25 +12,30 @@ namespace popl {
 // TODO: Reason about environment pointer
 class Interpreter {
    public:
-    void         Interpret(std::vector<Stmt>& statements, bool replMode);
-    Environment* GetGlobalEnvironment() { return &m_global_environment; }
-    void         ExecuteBlock(const std::vector<std::unique_ptr<Stmt>>& stmts,
-                              Environment*                              newEnv);
+    Interpreter()
+        : m_global_environment{std::make_shared<Environment>()},
+          m_current_environment{m_global_environment} {}
+    void Interpret(std::vector<Stmt>& statements, bool replMode);
+    std::shared_ptr<Environment> GetGlobalEnvironment() {
+        return m_global_environment;
+    }
+    void ExecuteBlock(const std::vector<std::unique_ptr<Stmt>>& stmts,
+                      std::shared_ptr<Environment>              newEnv);
     /*
      * Statement visitor
      */
-    void         operator()(const ExpressionStmt& stmt);
-    void         operator()(const PrintStmt& stmt);
-    void         operator()(const NilStmt& stmt);
-    void         operator()(const VarStmt& stmt);
-    void         operator()(const BlockStmt& stmt);
-    void         operator()(const AssignStmt& stmt);
-    void         operator()(IfStmt& stmt);
-    void         operator()(WhileStmt& stmt);
-    void         operator()(const BreakStmt& stmt);
-    void         operator()(const ContinueStmt& stmt);
-    void         operator()(const ReturnStmt& stmt);
-    void         operator()(FunctionStmt& stmt);
+    void operator()(const ExpressionStmt& stmt);
+    void operator()(const PrintStmt& stmt);
+    void operator()(const NilStmt& stmt);
+    void operator()(const VarStmt& stmt);
+    void operator()(const BlockStmt& stmt);
+    void operator()(const AssignStmt& stmt);
+    void operator()(IfStmt& stmt);
+    void operator()(WhileStmt& stmt);
+    void operator()(const BreakStmt& stmt);
+    void operator()(const ContinueStmt& stmt);
+    void operator()(const ReturnStmt& stmt);
+    void operator()(FunctionStmt& stmt);
 
     /*
      * Expression visitor
@@ -53,8 +60,8 @@ class Interpreter {
     Token MakeReplReadToken(std::string_view what = "<repl>") const;
 
    private:
-    Environment  m_global_environment{};
-    Environment* environment{&m_global_environment};
-    bool         m_repl_mode{false};
+    std::shared_ptr<Environment> m_global_environment{};
+    std::shared_ptr<Environment> m_current_environment{};
+    bool                         m_repl_mode{false};
 };
 };  // namespace popl

@@ -44,15 +44,15 @@ void Interpreter::operator()(const NilStmt& stmt) {
 void Interpreter::operator()(const VarStmt& stmt) {
     PopLObject value{UninitializedValue{}};
     if (stmt.initializer) value = Evaluate(*(stmt.initializer));
-    environment->Define(stmt.name, value);
+    m_current_environment->Define(stmt.name, value);
 }
 void Interpreter::operator()(const BlockStmt& stmt) {
-    Environment blockEnv(environment);
-    ExecuteBlock(stmt.statements, &blockEnv);
+    auto blockEnv = std::make_shared<Environment>(m_current_environment);
+    ExecuteBlock(stmt.statements, blockEnv);
 }
 void Interpreter::operator()(const AssignStmt& stmt) {
     PopLObject value{Evaluate(*(stmt.value))};
-    environment->Assign(stmt.name, value);
+    m_current_environment->Assign(stmt.name, value);
 }
 void Interpreter::operator()(IfStmt& stmt) {
     if (Evaluate(*stmt.condition).isTruthy())
@@ -84,8 +84,9 @@ void Interpreter::operator()(WhileStmt& stmt) {
 }
 void Interpreter::operator()(FunctionStmt& stmt) {
     Token name = stmt.name;
-    auto  func = std::make_shared<callable::PoplFunction>(std::move(stmt));
-    environment->Define(name, PopLObject{func});
+    auto  func = std::make_shared<callable::PoplFunction>(std::move(stmt),
+                                                          m_current_environment);
+    m_current_environment->Define(name, PopLObject{func});
 }
 /*
  * Expression visitor
@@ -105,7 +106,7 @@ PopLObject Interpreter::operator()(const TernaryExpr& expr) {
     return Evaluate(*expr.elseBranch);
 }
 PopLObject Interpreter::operator()(const VariableExpr& expr) const {
-    return environment->Get(expr.name);
+    return m_current_environment->Get(expr.name);
 }
 PopLObject Interpreter::operator()(const NilExpr& expr) const {
     return PopLObject{NilValue{}};
@@ -227,17 +228,17 @@ Token Interpreter::MakeReplReadToken(std::string_view what) const {
                  PopLObject{NilValue{}}, 1};
 }
 void Interpreter::ExecuteBlock(const std::vector<std::unique_ptr<Stmt>>& stmts,
-                               Environment* newEnv) {
-    Environment* previous = environment;
+                               std::shared_ptr<Environment> newEnv) {
+    auto previous = m_current_environment;
     try {
-        environment = newEnv;
+        m_current_environment = newEnv;
         for (const auto& stmt : stmts) {
             Execute(*stmt);
         }
     } catch (...) {
-        environment = previous;
+        m_current_environment = previous;
         throw;
     }
-    environment = previous;
+    m_current_environment = previous;
 }
 };  // namespace popl
