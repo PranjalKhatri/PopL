@@ -93,6 +93,7 @@ class Parser {
     Expr     CallExpression();
     CallExpr FinishCall(Expr callee);
     Expr     Primary();
+    Expr     AnonymousFunction();
 
     template <typename ExprType = BinaryExpr, typename SubParser>
     Expr ParseBinary(SubParser&&                      parseOperand,

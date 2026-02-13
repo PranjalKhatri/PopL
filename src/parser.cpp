@@ -18,7 +18,11 @@ std::vector<Stmt> Parser::Parse() {
 Stmt Parser::Declaration() {
     try {
         if (Match({TokenType::VAR})) return VarDeclaration();
-        if (Match({TokenType::FUN})) return FunctionDeclaration("function");
+        if (Peek().GetType() == TokenType::FUN &&
+            PeekNext().GetType() == TokenType::IDENTIFIER) {
+            Advance();  // consume FUN
+            return FunctionDeclaration("function");
+        }
         return Statement();
     } catch (const ParseError& error) {
         Synchronize();
@@ -45,8 +49,9 @@ Stmt Parser::FunctionDeclaration(std::string_view kind) {
     DepthGuard guard{m_function_depth};
 
     auto body{BlockStatement()};
-    return Stmt{
-        FunctionStmt{std::move(name), std::move(parameters), std::move(body)}};
+    return Stmt{FunctionStmt{
+        std::move(name), std::make_unique<FunctionExpr>(std::move(parameters),
+                                                        std::move(body))}};
 }
 
 Stmt Parser::VarDeclaration() {
@@ -317,12 +322,30 @@ Expr Parser::Primary() {
     if (Match({TokenType::IDENTIFIER})) {
         return Expr{VariableExpr{Previous()}};
     }
-
+    if (Match({TokenType::FUN})) return AnonymousFunction();
     if (Match({TokenType::LEFT_PAREN})) {
         Expr expr{Expression()};
         Consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
         return Expr{GroupingExpr{MakeExprPtr(std::move(expr))}};
     }
     throw Error(Peek(), "Expect expression");
+}
+Expr Parser::AnonymousFunction() {
+    Consume(TokenType::LEFT_PAREN, "Expect '(' after 'fun'.");
+
+    std::vector<Token> parameters;
+    if (!Check(TokenType::RIGHT_PAREN)) {
+        do {
+            parameters.push_back(
+                Consume(TokenType::IDENTIFIER, "Expect parameter name."));
+        } while (Match({TokenType::COMMA}));
+    }
+
+    Consume(TokenType::RIGHT_PAREN, "Expect ')' after parameters.");
+    Consume(TokenType::LEFT_BRACE, "Expect '{' before function body.");
+
+    auto body = BlockStatement();
+
+    return Expr{FunctionExpr{std::move(parameters), std::move(body)}};
 }
 };  // namespace popl
