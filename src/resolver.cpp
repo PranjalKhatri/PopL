@@ -29,6 +29,12 @@ void Resolver::Resolve(const Expr& expr) {
 }
 void Resolver::Declare(const Token& name) {
     if (m_scopes.empty()) return;
+    if (m_scopes.back().contains(name.GetLexeme()))
+        Diagnostics::Error(
+            name,
+            std::format("Variable with name {} already exists in this scop.",
+                        name.GetLexeme()));
+
     m_scopes.back().insert_or_assign(name.GetLexeme(), false);
 }
 void Resolver::Define(const Token& name) {
@@ -52,13 +58,19 @@ void Resolver::ResolveLocal(const Expr& expr, const Token& name) {
     }
 }
 
-void Resolver::ResolveFunction(const FunctionStmt& stmt) {
+void Resolver::ResolveFunction(const FunctionStmt& stmt,
+                               FunctionType        funcType) {
     ScopeGuard guard(m_scopes);
+
+    FunctionType enclosingFunction = m_current_function_type;
+    m_current_function_type        = funcType;
+
     for (const Token& param : stmt.func->params) {
         Declare(param);
         Define(param);
     }
     Resolve(stmt.func->body);
+    m_current_function_type = enclosingFunction;
 }
 
 void Resolver::operator()(const VarStmt& stmt, const Stmt&) {
@@ -84,7 +96,7 @@ void Resolver::operator()(const AssignStmt& stmt, const Stmt&) {
 void Resolver::operator()(const FunctionStmt& stmt, const Stmt&) {
     Declare(stmt.name);
     Define(stmt.name);
-    ResolveFunction(stmt);
+    ResolveFunction(stmt, FunctionType::FUNCTION);
 }
 
 void Resolver::operator()(const ExpressionStmt& stmt, const Stmt&) {
@@ -100,12 +112,28 @@ void Resolver::operator()(const IfStmt& stmt, const Stmt&) {
 }
 void Resolver::operator()(const NilStmt& stmt, const Stmt&) {}
 void Resolver::operator()(const WhileStmt& stmt, const Stmt&) {
+    LoopType enclosing  = m_current_loop_type;
+    m_current_loop_type = LoopType::LOOP;
+
     Resolve(*stmt.condition);
     Resolve(*stmt.body);
+
+    m_current_loop_type = enclosing;
 }
-void Resolver::operator()(const BreakStmt& stmt, const Stmt&) {}
-void Resolver::operator()(const ContinueStmt& stmt, const Stmt&) {}
+void Resolver::operator()(const BreakStmt& stmt, const Stmt&) {
+    if (m_current_loop_type != LoopType::LOOP)
+        Diagnostics::Error(stmt.keyword,
+                           "'break' statement not inside a loop.");
+}
+void Resolver::operator()(const ContinueStmt& stmt, const Stmt&) {
+    if (m_current_loop_type != LoopType::LOOP)
+        Diagnostics::Error(stmt.keyword,
+                           "'continue' statement not inside a loop.");
+}
 void Resolver::operator()(const ReturnStmt& stmt, const Stmt&) {
+    if (m_current_function_type == FunctionType::NONE) {
+        Diagnostics::Error(stmt.keyword, "Can't return from top-level code.");
+    }
     if (stmt.value) Resolve(*stmt.value);
 }
 

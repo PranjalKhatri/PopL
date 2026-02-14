@@ -44,15 +44,20 @@ class Resolver {
        private:
         std::vector<std::unordered_map<std::string, bool>>& scopes;
     };
+    enum class FunctionType { NONE, FUNCTION };
+    enum class LoopType { NONE, LOOP };
+
     void Declare(const Token& name);
     void Define(const Token& name);
     void ResolveLocal(const Expr& expr, const Token& name);
-    void ResolveFunction(const FunctionStmt& stmt);
+    void ResolveFunction(const FunctionStmt& stmt, FunctionType type);
     void Resolve(const Stmt& statement);
     void Resolve(const Expr& expr);
 
    private:
     Interpreter&                                       m_interpreter;
     std::vector<std::unordered_map<std::string, bool>> m_scopes{};
+    FunctionType m_current_function_type{FunctionType::NONE};
+    LoopType     m_current_loop_type{Resolver::LoopType::NONE};
 };
 }  // namespace popl
