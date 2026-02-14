@@ -38,21 +38,25 @@ class Resolver {
     void operator()(FunctionExpr& expr, Expr&);
 
    private:
+    enum class FunctionType { NONE, FUNCTION };
+    enum class LoopType { NONE, LOOP };
+    struct VariableInfo {
+        bool  defined = false;
+        bool  used    = false;
+        Token keyword;
+    };
     class ScopeGuard {
        public:
-        ScopeGuard(std::vector<std::unordered_map<std::string, bool>>& scopes_)
+        ScopeGuard(
+            std::vector<std::unordered_map<std::string, VariableInfo>>& scopes_)
             : scopes(scopes_) {
             scopes.emplace_back();
         }
-
-        ~ScopeGuard() { scopes.pop_back(); }
+        ~ScopeGuard();
 
        private:
-        std::vector<std::unordered_map<std::string, bool>>& scopes;
+        std::vector<std::unordered_map<std::string, VariableInfo>>& scopes;
     };
-
-    enum class FunctionType { NONE, FUNCTION };
-    enum class LoopType { NONE, LOOP };
 
     void Declare(const Token& name);
     void Define(const Token& name);
@@ -66,7 +70,7 @@ class Resolver {
    private:
     Interpreter& m_interpreter;
 
-    std::vector<std::unordered_map<std::string, bool>> m_scopes{};
+    std::vector<std::unordered_map<std::string, VariableInfo>> m_scopes{};
 
     FunctionType m_current_function_type{FunctionType::NONE};
     LoopType     m_current_loop_type{LoopType::NONE};

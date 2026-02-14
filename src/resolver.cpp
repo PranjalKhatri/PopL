@@ -9,7 +9,16 @@
 #include "popl/syntax/ast/stmt.hpp"
 
 namespace popl {
-
+Resolver::ScopeGuard::~ScopeGuard() {
+    for (const auto& [_, info] : scopes.back()) {
+        if (info.defined && !info.used) {
+            Diagnostics::Error(
+                info.keyword,
+                "Unused local variable '" + info.keyword.GetLexeme() + "'.");
+        }
+    }
+    scopes.pop_back();
+}
 void Resolver::Resolve(Stmt& stmt) {
     visitStmtWithArgs(
         stmt,
@@ -34,11 +43,15 @@ void Resolver::Declare(const Token& name) {
             std::format("Variable with name {} already exists in this scop.",
                         name.GetLexeme()));
 
-    m_scopes.back().insert_or_assign(name.GetLexeme(), false);
+    m_scopes.back().insert_or_assign(
+        name.GetLexeme(),
+        VariableInfo{.defined = false, .used = false, .keyword = name});
 }
 void Resolver::Define(const Token& name) {
     if (m_scopes.empty()) return;
-    m_scopes.back().insert_or_assign(name.GetLexeme(), true);
+    m_scopes.back().insert_or_assign(
+        name.GetLexeme(),
+        VariableInfo{.defined = true, .used = false, .keyword = name});
 }
 
 void Resolver::Resolve(std::vector<std::unique_ptr<Stmt>>& statements) {
@@ -48,9 +61,10 @@ void Resolver::Resolve(std::vector<std::unique_ptr<Stmt>>& statements) {
 void Resolver::ResolveLocal(VariableExpr& expr, const Token& name) {
     // iterate from innermost scope to outermost
     for (int i = static_cast<int>(m_scopes.size()) - 1; i >= 0; --i) {
-        auto& scope = m_scopes[i];
-        if (scope.find(name.GetLexeme()) != scope.end()) {
-            expr.depth = static_cast<int>(m_scopes.size()) - 1 - i;
+        auto it = m_scopes[i].find(name.GetLexeme());
+        if (it != m_scopes[i].end()) {
+            it->second.used = true;
+            expr.depth      = static_cast<int>(m_scopes.size()) - 1 - i;
             return;
         }
     }
@@ -84,7 +98,7 @@ void Resolver::operator()(AssignStmt& stmt, Stmt&) {
     if (!m_scopes.empty()) {
         auto& currentScope = m_scopes.back();
         auto  it           = currentScope.find(stmt.name.GetLexeme());
-        if (it != currentScope.end() && it->second == false) {
+        if (it != currentScope.end() && it->second.defined == false) {
             Diagnostics::Error(
                 stmt.name, "Can't read local variable in its own initializer.");
         }
@@ -136,7 +150,7 @@ void Resolver::operator()(VariableExpr& expr, Expr& originalExpr) {
         auto& currentScope = m_scopes.back();
         auto  it           = currentScope.find(expr.name.GetLexeme());
 
-        if (it != currentScope.end() && it->second == false) {
+        if (it != currentScope.end() && it->second.defined == false) {
             Diagnostics::Error(
                 expr.name, "Can't read local variable in its own initializer.");
         }
