@@ -5,7 +5,7 @@
 #include <string>
 #include <variant>
 
-#include "popl/callable.hpp"
+#include "popl/callables/callable.hpp"
 
 namespace popl {
 struct UninitializedValue {};

@@ -4,7 +4,7 @@
 #include <optional>
 #include <string>
 
-#include "popl/callable.hpp"
+#include "callable.hpp"
 #include "popl/environment.hpp"
 #include "popl/syntax/ast/expr.hpp"
 #include "popl/syntax/visitors/clone_visitor.hpp"

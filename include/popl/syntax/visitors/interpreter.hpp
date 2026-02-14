@@ -9,7 +9,6 @@
 
 namespace popl {
 
-// TODO: Reason about environment pointer
 class Interpreter {
    public:
     Interpreter()
