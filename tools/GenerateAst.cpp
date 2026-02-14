@@ -167,7 +167,8 @@ int main(int argc, char** argv) {
                     "std::vector<std::unique_ptr<{}>> "
                     "arguments",
                     exprBaseName, exprBaseName, exprBaseName),
-        std::format("Variable{}: Token name", exprBaseName),
+        std::format("Variable{}: Token name, std::optional<int> depth",
+                    exprBaseName),
         std::format("Logical{}: {}* left, Token op, {}* right", exprBaseName,
                     exprBaseName, exprBaseName),
         std::format("Function{}: std::vector<Token> params, "

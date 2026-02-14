@@ -47,7 +47,8 @@ struct CallExpr {
 };
 
 struct VariableExpr {
-    Token name;
+    Token              name;
+    std::optional<int> depth;
 };
 
 struct LogicalExpr {
