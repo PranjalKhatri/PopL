@@ -8,6 +8,8 @@ add_executable(PopL
                 interpreter.cpp
                 popl_function.cpp
                 clone_visitor.cpp
+                native_function.cpp
+                native_registry.cpp
 )
 
 target_include_directories(PopL
