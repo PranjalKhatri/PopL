@@ -10,6 +10,7 @@ add_executable(PopL
                 clone_visitor.cpp
                 native_function.cpp
                 native_registry.cpp
+                resolver.cpp
 )
 
 target_include_directories(PopL
