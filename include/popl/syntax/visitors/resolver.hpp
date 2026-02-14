@@ -1,62 +1,75 @@
 #pragma once
 
 #include "popl/syntax/ast/stmt.hpp"
+
 namespace popl {
+
 class Interpreter;
+
 class Resolver {
    public:
     Resolver(Interpreter& interpreter) : m_interpreter{interpreter} {}
-    void Resolve(const std::vector<std::unique_ptr<Stmt>>& statements);
 
-    void operator()(const ExpressionStmt& stmt, const Stmt& originalStmt);
-    void operator()(const NilStmt& stmt, const Stmt&);
-    void operator()(const VarStmt& stmt, const Stmt&);
-    void operator()(const BlockStmt& stmt, const Stmt&);
-    void operator()(const AssignStmt& stmt, const Stmt&);
-    void operator()(const IfStmt& stmt, const Stmt&);
-    void operator()(const WhileStmt& stmt, const Stmt&);
-    void operator()(const BreakStmt& stmt, const Stmt&);
-    void operator()(const ContinueStmt& stmt, const Stmt&);
-    void operator()(const ReturnStmt& stmt, const Stmt&);
-    void operator()(const FunctionStmt& stmt, const Stmt&);
+    void Resolve(std::vector<std::unique_ptr<Stmt>>& statements);
 
-    void operator()(const LiteralExpr& expr, const Expr& originalExpr);
-    void operator()(const GroupingExpr& expr, const Expr&);
-    void operator()(const TernaryExpr& expr, const Expr&);
-    void operator()(const UnaryExpr& expr, const Expr&);
-    void operator()(const BinaryExpr& expr, const Expr&);
-    void operator()(const VariableExpr& expr, const Expr&);
-    void operator()(const NilExpr& expr, const Expr&);
-    void operator()(const LogicalExpr& expr, const Expr&);
-    void operator()(const CallExpr& expr, const Expr&);
-    void operator()(const FunctionExpr& expr, const Expr&);
+    //  Statement visitors
+    void operator()(ExpressionStmt& stmt, Stmt& originalStmt);
+    void operator()(NilStmt& stmt, Stmt&);
+    void operator()(VarStmt& stmt, Stmt&);
+    void operator()(BlockStmt& stmt, Stmt&);
+    void operator()(AssignStmt& stmt, Stmt&);
+    void operator()(IfStmt& stmt, Stmt&);
+    void operator()(WhileStmt& stmt, Stmt&);
+    void operator()(BreakStmt& stmt, Stmt&);
+    void operator()(ContinueStmt& stmt, Stmt&);
+    void operator()(ReturnStmt& stmt, Stmt&);
+    void operator()(FunctionStmt& stmt, Stmt&);
+
+    //  Expression visitors
+    void operator()(LiteralExpr& expr, Expr& originalExpr);
+    void operator()(GroupingExpr& expr, Expr&);
+    void operator()(TernaryExpr& expr, Expr&);
+    void operator()(UnaryExpr& expr, Expr&);
+    void operator()(BinaryExpr& expr, Expr&);
+    void operator()(VariableExpr& expr, Expr&);
+    void operator()(NilExpr& expr, Expr&);
+    void operator()(LogicalExpr& expr, Expr&);
+    void operator()(CallExpr& expr, Expr&);
+    void operator()(FunctionExpr& expr, Expr&);
 
    private:
     class ScopeGuard {
        public:
         ScopeGuard(std::vector<std::unordered_map<std::string, bool>>& scopes_)
             : scopes(scopes_) {
-            scopes.emplace_back(std::unordered_map<std::string, bool>{});
+            scopes.emplace_back();
         }
+
         ~ScopeGuard() { scopes.pop_back(); }
 
        private:
         std::vector<std::unordered_map<std::string, bool>>& scopes;
     };
+
     enum class FunctionType { NONE, FUNCTION };
     enum class LoopType { NONE, LOOP };
 
     void Declare(const Token& name);
     void Define(const Token& name);
-    void ResolveLocal(const Expr& expr, const Token& name);
-    void ResolveFunction(const FunctionStmt& stmt, FunctionType type);
-    void Resolve(const Stmt& statement);
-    void Resolve(const Expr& expr);
+
+    void ResolveLocal(VariableExpr& expr, const Token& name);
+    void ResolveFunction(FunctionStmt& stmt, FunctionType type);
+
+    void Resolve(Stmt& statement);
+    void Resolve(Expr& expr);
 
    private:
-    Interpreter&                                       m_interpreter;
+    Interpreter& m_interpreter;
+
     std::vector<std::unordered_map<std::string, bool>> m_scopes{};
+
     FunctionType m_current_function_type{FunctionType::NONE};
-    LoopType     m_current_loop_type{Resolver::LoopType::NONE};
+    LoopType     m_current_loop_type{LoopType::NONE};
 };
+
 }  // namespace popl
