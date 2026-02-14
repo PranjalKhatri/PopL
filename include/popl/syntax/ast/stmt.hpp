@@ -67,18 +67,8 @@ struct Stmt {
     Variant node;
 };
 
-template <typename Visitor>
-decltype(auto) visitStmt(Stmt& stmt, Visitor&& visitor) {
-    return std::visit(std::forward<Visitor>(visitor), stmt.node);
-}
-
-template <typename Visitor>
-decltype(auto) visitStmt(const Stmt& stmt, Visitor&& visitor) {
-    return std::visit(std::forward<Visitor>(visitor), stmt.node);
-}
-
 template <typename Visitor, typename... Extra>
-decltype(auto) visitStmtWithArgs(Stmt& var, Visitor&& visitor,
+decltype(auto) visitStmtWithArgs(Stmt& stmt, Visitor&& visitor,
                                  Extra&&... extra) {
     return std::visit(
         [&](auto&& contained) -> decltype(auto) {
@@ -86,10 +76,11 @@ decltype(auto) visitStmtWithArgs(Stmt& var, Visitor&& visitor,
                 std::forward<decltype(contained)>(contained),
                 std::forward<Extra>(extra)...);
         },
-        var.node);
+        stmt.node);
 }
+
 template <typename Visitor, typename... Extra>
-decltype(auto) visitStmtWithArgs(const Stmt& var, Visitor&& visitor,
+decltype(auto) visitStmtWithArgs(const Stmt& stmt, Visitor&& visitor,
                                  Extra&&... extra) {
     return std::visit(
         [&](auto&& contained) -> decltype(auto) {
@@ -97,6 +88,6 @@ decltype(auto) visitStmtWithArgs(const Stmt& var, Visitor&& visitor,
                 std::forward<decltype(contained)>(contained),
                 std::forward<Extra>(extra)...);
         },
-        var.node);
+        stmt.node);
 }
 }  // namespace popl

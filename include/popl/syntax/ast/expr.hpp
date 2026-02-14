@@ -69,18 +69,8 @@ struct Expr {
     Variant node;
 };
 
-template <typename Visitor>
-decltype(auto) visitExpr(Expr& expr, Visitor&& visitor) {
-    return std::visit(std::forward<Visitor>(visitor), expr.node);
-}
-
-template <typename Visitor>
-decltype(auto) visitExpr(const Expr& expr, Visitor&& visitor) {
-    return std::visit(std::forward<Visitor>(visitor), expr.node);
-}
-
 template <typename Visitor, typename... Extra>
-decltype(auto) visitExprWithArgs(Expr& var, Visitor&& visitor,
+decltype(auto) visitExprWithArgs(Expr& expr, Visitor&& visitor,
                                  Extra&&... extra) {
     return std::visit(
         [&](auto&& contained) -> decltype(auto) {
@@ -88,11 +78,11 @@ decltype(auto) visitExprWithArgs(Expr& var, Visitor&& visitor,
                 std::forward<decltype(contained)>(contained),
                 std::forward<Extra>(extra)...);
         },
-        var.node);
+        expr.node);
 }
 
 template <typename Visitor, typename... Extra>
-decltype(auto) visitExprWithArgs(const Expr& var, Visitor&& visitor,
+decltype(auto) visitExprWithArgs(const Expr& expr, Visitor&& visitor,
                                  Extra&&... extra) {
     return std::visit(
         [&](auto&& contained) -> decltype(auto) {
@@ -100,6 +90,6 @@ decltype(auto) visitExprWithArgs(const Expr& var, Visitor&& visitor,
                 std::forward<decltype(contained)>(contained),
                 std::forward<Extra>(extra)...);
         },
-        var.node);
+        expr.node);
 }
 }  // namespace popl

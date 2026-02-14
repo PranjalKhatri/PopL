@@ -28,24 +28,39 @@ static void defineNilType(std::ofstream& out, const std::string& exprBaseName) {
 }
 
 static void defineVisitor(std::ofstream& out, const std::string& exprBaseName,
-                          const std::vector<std::string>& types) {
+                          const std::vector<std::string>& /*types*/) {
     out << "\n";
-    out << "template <typename Visitor>\n";
-    out << "decltype(auto) visit" << exprBaseName << "(" << exprBaseName << "& "
-        << static_cast<char>(std::tolower(exprBaseName[0]))
-        << exprBaseName.substr(1) << ", Visitor&& visitor) {\n";
-    out << "    return std::visit(std::forward<Visitor>(visitor), "
-        << static_cast<char>(std::tolower(exprBaseName[0]))
-        << exprBaseName.substr(1) << ".node);\n";
+
+    std::string varName = static_cast<char>(std::tolower(exprBaseName[0])) +
+                          exprBaseName.substr(1);
+
+    // Non-const overload
+    out << "template <typename Visitor, typename... Extra>\n";
+    out << "decltype(auto) visit" << exprBaseName << "WithArgs(" << exprBaseName
+        << "& " << varName << ", Visitor&& visitor, Extra&&... extra) {\n";
+
+    out << "    return std::visit(\n";
+    out << "        [&](auto&& contained) -> decltype(auto) {\n";
+    out << "            return std::forward<Visitor>(visitor)(\n";
+    out << "                std::forward<decltype(contained)>(contained),\n";
+    out << "                std::forward<Extra>(extra)...);\n";
+    out << "        },\n";
+    out << "        " << varName << ".node);\n";
     out << "}\n\n";
 
-    out << "template <typename Visitor>\n";
-    out << "decltype(auto) visit" << exprBaseName << "(const " << exprBaseName
-        << "& " << static_cast<char>(std::tolower(exprBaseName[0]))
-        << exprBaseName.substr(1) << ", Visitor&& visitor) {\n";
-    out << "    return std::visit(std::forward<Visitor>(visitor), "
-        << static_cast<char>(std::tolower(exprBaseName[0]))
-        << exprBaseName.substr(1) << ".node);\n";
+    // Const overload
+    out << "template <typename Visitor, typename... Extra>\n";
+    out << "decltype(auto) visit" << exprBaseName << "WithArgs(const "
+        << exprBaseName << "& " << varName
+        << ", Visitor&& visitor, Extra&&... extra) {\n";
+
+    out << "    return std::visit(\n";
+    out << "        [&](auto&& contained) -> decltype(auto) {\n";
+    out << "            return std::forward<Visitor>(visitor)(\n";
+    out << "                std::forward<decltype(contained)>(contained),\n";
+    out << "                std::forward<Extra>(extra)...);\n";
+    out << "        },\n";
+    out << "        " << varName << ".node);\n";
     out << "}\n";
 }
 
