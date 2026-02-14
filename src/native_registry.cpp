@@ -1,11 +1,12 @@
 #include "popl/callables/native_registry.hpp"
 
 #include <chrono>
-#include <iostream>
 #include <memory>
+#include <print>
 
 #include "popl/callables/native_functions.hpp"
 #include "popl/environment.hpp"
+#include "popl/literal.hpp"
 #include "popl/syntax/visitors/interpreter.hpp"
 
 namespace popl {
@@ -36,6 +37,12 @@ void NativeRegistry::RegisterAll(Interpreter& interpreter) {
                  double seconds = duration<double>(now).count();
                  return PopLObject(seconds);
              });
+    Register(
+        interpreter, globals, "print", 1,
+        [](Interpreter&, const std::vector<PopLObject>& args) -> PopLObject {
+            std::println("{}", args[0].toString());
+            return PopLObject{NilValue{}};
+        });
 }
 
 }  // namespace popl
