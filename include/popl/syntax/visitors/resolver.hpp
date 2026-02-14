@@ -6,30 +6,31 @@ class Interpreter;
 class Resolver {
    public:
     Resolver(Interpreter& interpreter) : m_interpreter{interpreter} {}
+    void Resolve(const std::vector<std::unique_ptr<Stmt>>& statements);
 
-    void operator()(const ExpressionStmt& stmt);
-    void operator()(const PrintStmt& stmt);
-    void operator()(const NilStmt& stmt);
-    void operator()(const VarStmt& stmt);
-    void operator()(const BlockStmt& stmt);
-    void operator()(const AssignStmt& stmt);
-    void operator()(const IfStmt& stmt);
-    void operator()(const WhileStmt& stmt);
-    void operator()(const BreakStmt& stmt);
-    void operator()(const ContinueStmt& stmt);
-    void operator()(const ReturnStmt& stmt);
-    void operator()(const FunctionStmt& stmt);
+    void operator()(const ExpressionStmt& stmt, const Stmt& originalStmt);
+    void operator()(const PrintStmt& stmt, const Stmt&);
+    void operator()(const NilStmt& stmt, const Stmt&);
+    void operator()(const VarStmt& stmt, const Stmt&);
+    void operator()(const BlockStmt& stmt, const Stmt&);
+    void operator()(const AssignStmt& stmt, const Stmt&);
+    void operator()(const IfStmt& stmt, const Stmt&);
+    void operator()(const WhileStmt& stmt, const Stmt&);
+    void operator()(const BreakStmt& stmt, const Stmt&);
+    void operator()(const ContinueStmt& stmt, const Stmt&);
+    void operator()(const ReturnStmt& stmt, const Stmt&);
+    void operator()(const FunctionStmt& stmt, const Stmt&);
 
-    void operator()(const LiteralExpr& expr);
-    void operator()(const GroupingExpr& expr);
-    void operator()(const TernaryExpr& expr);
-    void operator()(const UnaryExpr& expr);
-    void operator()(const BinaryExpr& expr);
-    void operator()(const VariableExpr& expr);
-    void operator()(const NilExpr& expr);
-    void operator()(const LogicalExpr& expr);
-    void operator()(const CallExpr& expr);
-    void operator()(const FunctionExpr& expr);
+    void operator()(const LiteralExpr& expr, const Expr& originalExpr);
+    void operator()(const GroupingExpr& expr, const Expr&);
+    void operator()(const TernaryExpr& expr, const Expr&);
+    void operator()(const UnaryExpr& expr, const Expr&);
+    void operator()(const BinaryExpr& expr, const Expr&);
+    void operator()(const VariableExpr& expr, const Expr&);
+    void operator()(const NilExpr& expr, const Expr&);
+    void operator()(const LogicalExpr& expr, const Expr&);
+    void operator()(const CallExpr& expr, const Expr&);
+    void operator()(const FunctionExpr& expr, const Expr&);
 
    private:
     class ScopeGuard {
@@ -48,7 +49,6 @@ class Resolver {
     void ResolveLocal(const Expr& expr, const Token& name);
     void ResolveFunction(const FunctionStmt& stmt);
     void Resolve(const Stmt& statement);
-    void Resolve(const std::vector<std::unique_ptr<Stmt>>& statements);
     void Resolve(const Expr& expr);
 
    private:

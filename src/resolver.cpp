@@ -11,8 +11,22 @@
 
 namespace popl {
 
-void Resolver::Resolve(const Stmt& stmt) { visitStmt(stmt, *this); }
-void Resolver::Resolve(const Expr& expr) { visitExpr(expr, *this); }
+void Resolver::Resolve(const Stmt& stmt) {
+    visitStmtWithArgs(
+        stmt,
+        [&stmt, this](auto&& contained, const Stmt& originalStmt) {
+            return (*this)(contained, originalStmt);
+        },
+        stmt);
+}
+void Resolver::Resolve(const Expr& expr) {
+    visitExprWithArgs(
+        expr,
+        [&expr, this](auto&& contained, const Expr& originalExpr) {
+            return (*this)(contained, originalExpr);
+        },
+        expr);
+}
 void Resolver::Declare(const Token& name) {
     if (m_scopes.empty()) return;
     m_scopes.back().insert_or_assign(name.GetLexeme(), false);
@@ -47,16 +61,16 @@ void Resolver::ResolveFunction(const FunctionStmt& stmt) {
     Resolve(stmt.func->body);
 }
 
-void Resolver::operator()(const VarStmt& stmt) {
+void Resolver::operator()(const VarStmt& stmt, const Stmt&) {
     Declare(stmt.name);
     if (stmt.initializer) Resolve(*stmt.initializer);
     Define(stmt.name);
 }
-void Resolver::operator()(const BlockStmt& stmt) {
+void Resolver::operator()(const BlockStmt& stmt, const Stmt&) {
     ScopeGuard guard(m_scopes);
     Resolve(stmt.statements);
 }
-void Resolver::operator()(const AssignStmt& stmt) {
+void Resolver::operator()(const AssignStmt& stmt, const Stmt&) {
     Resolve(*stmt.value);
     if (!m_scopes.empty()) {
         auto& currentScope = m_scopes.back();
@@ -67,33 +81,35 @@ void Resolver::operator()(const AssignStmt& stmt) {
         }
     }
 }
-void Resolver::operator()(const FunctionStmt& stmt) {
+void Resolver::operator()(const FunctionStmt& stmt, const Stmt&) {
     Declare(stmt.name);
     Define(stmt.name);
     ResolveFunction(stmt);
 }
 
-void Resolver::operator()(const ExpressionStmt& stmt) {
+void Resolver::operator()(const ExpressionStmt& stmt, const Stmt&) {
     Resolve(*stmt.expression);
 }
-void Resolver::operator()(const PrintStmt& stmt) { Resolve(*stmt.expression); }
-void Resolver::operator()(const IfStmt& stmt) {
+void Resolver::operator()(const PrintStmt& stmt, const Stmt&) {
+    Resolve(*stmt.expression);
+}
+void Resolver::operator()(const IfStmt& stmt, const Stmt&) {
     Resolve(*stmt.condition);
     Resolve(*stmt.thenBranch);
     if (stmt.elseBranch) Resolve(*stmt.elseBranch);
 }
-void Resolver::operator()(const NilStmt& stmt) {}
-void Resolver::operator()(const WhileStmt& stmt) {
+void Resolver::operator()(const NilStmt& stmt, const Stmt&) {}
+void Resolver::operator()(const WhileStmt& stmt, const Stmt&) {
     Resolve(*stmt.condition);
     Resolve(*stmt.body);
 }
-void Resolver::operator()(const BreakStmt& stmt) {}
-void Resolver::operator()(const ContinueStmt& stmt) {}
-void Resolver::operator()(const ReturnStmt& stmt) {
+void Resolver::operator()(const BreakStmt& stmt, const Stmt&) {}
+void Resolver::operator()(const ContinueStmt& stmt, const Stmt&) {}
+void Resolver::operator()(const ReturnStmt& stmt, const Stmt&) {
     if (stmt.value) Resolve(*stmt.value);
 }
 
-void Resolver::operator()(const VariableExpr& expr) {
+void Resolver::operator()(const VariableExpr& expr, const Expr& originalExpr) {
     if (!m_scopes.empty()) {
         auto& currentScope = m_scopes.back();
         auto  it           = currentScope.find(expr.name.GetLexeme());
@@ -103,30 +119,32 @@ void Resolver::operator()(const VariableExpr& expr) {
                 expr.name, "Can't read local variable in its own initializer.");
         }
     }
-    ResolveLocal(Expr{expr}, expr.name);
+    ResolveLocal(originalExpr, expr.name);
 }
-void Resolver::operator()(const CallExpr& expr) {
+void Resolver::operator()(const CallExpr& expr, const Expr&) {
     Resolve(*expr.callee);
     for (const auto& arg : expr.arguments) Resolve(*arg);
 }
-void Resolver::operator()(const FunctionExpr& expr) {}
-void Resolver::operator()(const LogicalExpr& expr) {
+void Resolver::operator()(const FunctionExpr& expr, const Expr&) {}
+void Resolver::operator()(const LogicalExpr& expr, const Expr&) {
     Resolve(*expr.left);
     Resolve(*expr.right);
 }
-void Resolver::operator()(const NilExpr& expr) {}
-void Resolver::operator()(const BinaryExpr& expr) {
+void Resolver::operator()(const NilExpr& expr, const Expr&) {}
+void Resolver::operator()(const BinaryExpr& expr, const Expr&) {
     Resolve(*expr.left);
     Resolve(*expr.right);
 }
-void Resolver::operator()(const UnaryExpr& expr) { Resolve(*expr.right); }
-void Resolver::operator()(const TernaryExpr& expr) {
+void Resolver::operator()(const UnaryExpr& expr, const Expr&) {
+    Resolve(*expr.right);
+}
+void Resolver::operator()(const TernaryExpr& expr, const Expr&) {
     Resolve(*expr.condition);
     Resolve(*expr.thenBranch);
     Resolve(*expr.elseBranch);
 }
-void Resolver::operator()(const GroupingExpr& expr) {
+void Resolver::operator()(const GroupingExpr& expr, const Expr&) {
     Resolve(*expr.expression);
 }
-void Resolver::operator()(const LiteralExpr& expr) {}
+void Resolver::operator()(const LiteralExpr& expr, const Expr&) {}
 };  // namespace popl
