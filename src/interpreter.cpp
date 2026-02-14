@@ -16,63 +16,67 @@
 
 namespace popl {
 
-void Interpreter::Interpret(std::vector<Stmt>& statements, bool replMode) {
+void Interpreter::Interpret(std::vector<std::unique_ptr<Stmt>>& statements,
+                            bool                                replMode) {
     m_repl_mode = replMode;
     try {
         for (auto& statement : statements) {
-            Execute(statement);
+            Execute(*statement);
         }
     } catch (const runtime::RunTimeError& error) {
         Diagnostics::ReportRunTimeError(error);
     }
 }
+void Interpreter::Resolve(const Expr& expr, int depth) {
+    m_locals[&expr] = depth;
+}
 
-void Interpreter::operator()(const ExpressionStmt& stmt) {
+void Interpreter::operator()(const ExpressionStmt& stmt, const Stmt&) {
     PopLObject obj = Evaluate(*(stmt.expression));
     if (m_repl_mode) {
         CheckUninitialised(MakeReplReadToken(), obj);
         std::println("Expression returned: {}", obj.toString());
     }
 }
-void Interpreter::operator()(const PrintStmt& stmt) {
+void Interpreter::operator()(const PrintStmt& stmt, const Stmt&) {
     PopLObject value = Evaluate(*(stmt.expression));
     CheckUninitialised(MakeReplReadToken("Print"), value);
     println("{}", value.toString());
 }
-void Interpreter::operator()(const NilStmt& stmt) {
+void Interpreter::operator()(const NilStmt& stmt, const Stmt&) {
     // Yeah.. do nothing
 }
-void Interpreter::operator()(const VarStmt& stmt) {
+void Interpreter::operator()(const VarStmt& stmt, const Stmt&) {
     PopLObject value{UninitializedValue{}};
     if (stmt.initializer) value = Evaluate(*(stmt.initializer));
     m_current_environment->Define(stmt.name, value);
 }
-void Interpreter::operator()(const BlockStmt& stmt) {
+void Interpreter::operator()(const BlockStmt& stmt, const Stmt&) {
     auto blockEnv = std::make_shared<Environment>(m_current_environment);
     ExecuteBlock(stmt.statements, blockEnv);
 }
-void Interpreter::operator()(const AssignStmt& stmt) {
+void Interpreter::operator()(const AssignStmt& stmt, const Stmt&) {
     PopLObject value{Evaluate(*(stmt.value))};
     m_current_environment->Assign(stmt.name, value);
 }
-void Interpreter::operator()(IfStmt& stmt) {
+void Interpreter::operator()(IfStmt& stmt, const Stmt&) {
     if (Evaluate(*stmt.condition).isTruthy())
         Execute(*stmt.thenBranch);
     else
         Execute(*stmt.elseBranch);
 }
-void Interpreter::operator()(const BreakStmt& stmt) {
+void Interpreter::operator()(const BreakStmt& stmt, const Stmt&) {
     throw runtime::control_flow::BreakSignal{};
 }
-void Interpreter::operator()(const ContinueStmt& stmt) {
+void Interpreter::operator()(const ContinueStmt& stmt, const Stmt&) {
     throw runtime::control_flow::ContinueSignal{};
 }
-void Interpreter::operator()(const ReturnStmt& stmt) {
+void Interpreter::operator()(const ReturnStmt& stmt, const Stmt&) {
     auto value = stmt.value ? Evaluate(*stmt.value) : PopLObject{NilValue{}};
     throw runtime::control_flow::ReturnSignal{std::move(value)};
 }
 
-void Interpreter::operator()(WhileStmt& stmt) {
+void Interpreter::operator()(WhileStmt& stmt, const Stmt&) {
     while (Evaluate(*stmt.condition).isTruthy()) {
         try {
             Execute(*stmt.body);
@@ -83,7 +87,7 @@ void Interpreter::operator()(WhileStmt& stmt) {
         }
     }
 }
-void Interpreter::operator()(FunctionStmt& stmt) {
+void Interpreter::operator()(FunctionStmt& stmt, const Stmt&) {
     Token name = stmt.name;
     auto  func = std::make_shared<callable::PoplFunction>(
         *stmt.func, m_current_environment, stmt.name.GetLexeme());
@@ -93,27 +97,28 @@ void Interpreter::operator()(FunctionStmt& stmt) {
 /*
  * Expression visitor
  */
-PopLObject Interpreter::operator()(const LiteralExpr& expr) const {
+PopLObject Interpreter::operator()(const LiteralExpr& expr, const Expr&) const {
     return expr.value;
 }
 
-PopLObject Interpreter::operator()(const GroupingExpr& expr) {
+PopLObject Interpreter::operator()(const GroupingExpr& expr, const Expr&) {
     return Evaluate(*expr.expression);
 }
 
-PopLObject Interpreter::operator()(const TernaryExpr& expr) {
+PopLObject Interpreter::operator()(const TernaryExpr& expr, const Expr&) {
     PopLObject left = Evaluate(*expr.condition);
     CheckUninitialised(expr.question, left);
     if (left.isTruthy()) return Evaluate(*expr.thenBranch);
     return Evaluate(*expr.elseBranch);
 }
-PopLObject Interpreter::operator()(const VariableExpr& expr) const {
-    return m_current_environment->Get(expr.name);
+PopLObject Interpreter::operator()(const VariableExpr& expr,
+                                   const Expr&         originalExpr) const {
+    return LookUpVariable(expr.name, originalExpr);
 }
-PopLObject Interpreter::operator()(const NilExpr& expr) const {
+PopLObject Interpreter::operator()(const NilExpr& expr, const Expr&) const {
     return PopLObject{NilValue{}};
 }
-PopLObject Interpreter::operator()(const LogicalExpr& expr) {
+PopLObject Interpreter::operator()(const LogicalExpr& expr, const Expr&) {
     auto left{Evaluate(*expr.left)};
     if (expr.op.GetType() == TokenType::OR) {
         if (left.isTruthy()) return left;
@@ -123,7 +128,7 @@ PopLObject Interpreter::operator()(const LogicalExpr& expr) {
     return Evaluate(*expr.right);
 }
 
-PopLObject Interpreter::operator()(const CallExpr& expr) {
+PopLObject Interpreter::operator()(const CallExpr& expr, const Expr&) {
     PopLObject              callee{Evaluate(*expr.callee)};
     std::vector<PopLObject> args;
     for (const auto& expr : expr.arguments) args.emplace_back(Evaluate(*expr));
@@ -138,7 +143,7 @@ PopLObject Interpreter::operator()(const CallExpr& expr) {
     return func->Call(*this, args);
 }
 
-PopLObject Interpreter::operator()(const FunctionExpr& expr) {
+PopLObject Interpreter::operator()(const FunctionExpr& expr, const Expr&) {
     auto function = std::make_shared<callable::PoplFunction>(
         expr, m_current_environment, std::nullopt);
 
@@ -146,10 +151,15 @@ PopLObject Interpreter::operator()(const FunctionExpr& expr) {
 }
 
 PopLObject Interpreter::Evaluate(const Expr& expr) {
-    return visitExpr(expr, *this);
+    return visitExprWithArgs(
+        expr,
+        [&expr, this](auto&& contained, const Expr& originalExpr) {
+            return (*this)(contained, originalExpr);
+        },
+        expr);
 }
 
-PopLObject Interpreter::operator()(const UnaryExpr& expr) {
+PopLObject Interpreter::operator()(const UnaryExpr& expr, const Expr&) {
     PopLObject right = Evaluate(*expr.right);
     CheckUninitialised(expr.op, right);
     switch (expr.op.GetType()) {
@@ -165,7 +175,7 @@ PopLObject Interpreter::operator()(const UnaryExpr& expr) {
     return PopLObject{NilValue{}};
 }
 
-PopLObject Interpreter::operator()(const BinaryExpr& expr) {
+PopLObject Interpreter::operator()(const BinaryExpr& expr, const Expr&) {
     PopLObject left  = Evaluate(*expr.left);
     PopLObject right = Evaluate(*expr.right);
 
@@ -216,7 +226,14 @@ PopLObject Interpreter::operator()(const BinaryExpr& expr) {
     // Unreachable
     return PopLObject{NilValue{}};
 }
-void Interpreter::Execute(Stmt& stmt) { visitStmt(stmt, *this); }
+void Interpreter::Execute(Stmt& stmt) {
+    visitStmtWithArgs(
+        stmt,
+        [this, &stmt](auto&& contained, Stmt& originalStmt) {
+            return (*this)(contained, originalStmt);
+        },
+        stmt);
+}
 
 void Interpreter::CheckNumberOperand(const Token&      op,
                                      const PopLObject& operand) const {
@@ -250,5 +267,16 @@ void Interpreter::ExecuteBlock(const std::vector<std::unique_ptr<Stmt>>& stmts,
         throw;
     }
     m_current_environment = previous;
+}
+
+const PopLObject& Interpreter::LookUpVariable(const Token& name,
+                                              const Expr&  expr) const {
+    auto it = m_locals.find(&expr);
+    if (it != m_locals.end()) {
+        int distance = it->second;
+        return m_current_environment->GetAt(distance, name);
+    } else {
+        return m_global_environment->Get(name);
+    }
 }
 };  // namespace popl
