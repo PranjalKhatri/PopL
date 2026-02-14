@@ -100,20 +100,8 @@ class Parser {
                      std::initializer_list<TokenType> ops);
 
    private:
-    /// RAII class for nesting counter
-    class DepthGuard {
-       public:
-        explicit DepthGuard(int& depth) : m_depth(depth) { ++m_depth; }
-
-        ~DepthGuard() { --m_depth; }
-
-       private:
-        int& m_depth;
-    };
-
     std::vector<Token> m_tokens{};
     int                m_current{};
-    int                m_loop_depth{}, m_function_depth{};
 };
 
 template <typename ExprType, typename SubParser>
