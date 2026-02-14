@@ -78,4 +78,28 @@ template <typename Visitor>
 decltype(auto) visitExpr(const Expr& expr, Visitor&& visitor) {
     return std::visit(std::forward<Visitor>(visitor), expr.node);
 }
+
+template <typename Visitor, typename... Extra>
+decltype(auto) visitExprWithArgs(Expr& var, Visitor&& visitor,
+                                 Extra&&... extra) {
+    return std::visit(
+        [&](auto&& contained) -> decltype(auto) {
+            return std::forward<Visitor>(visitor)(
+                std::forward<decltype(contained)>(contained),
+                std::forward<Extra>(extra)...);
+        },
+        var.node);
+}
+
+template <typename Visitor, typename... Extra>
+decltype(auto) visitExprWithArgs(const Expr& var, Visitor&& visitor,
+                                 Extra&&... extra) {
+    return std::visit(
+        [&](auto&& contained) -> decltype(auto) {
+            return std::forward<Visitor>(visitor)(
+                std::forward<decltype(contained)>(contained),
+                std::forward<Extra>(extra)...);
+        },
+        var.node);
+}
 }  // namespace popl
