@@ -11,11 +11,11 @@ namespace popl::callable {
 PopLObject PoplFunction::Call(Interpreter&                   interpreter,
                               const std::vector<PopLObject>& args) {
     auto localEnv{std::make_shared<Environment>(m_closure)};
-    for (size_t i = 0; i < m_declaration.params.size(); ++i) {
-        localEnv->Define(m_declaration.params[i], args[i]);
+    for (size_t i = 0; i < m_declaration->params.size(); ++i) {
+        localEnv->Define(m_declaration->params[i], args[i]);
     }
     try {
-        interpreter.ExecuteBlock(m_declaration.body, localEnv);
+        interpreter.ExecuteBlock(m_declaration->body, localEnv);
     } catch (const runtime::control_flow::ReturnSignal& returnValue) {
         return returnValue.value;
     }
