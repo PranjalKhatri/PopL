@@ -23,6 +23,7 @@ class Interpreter {
     }
     void ExecuteBlock(const std::vector<std::unique_ptr<Stmt>>& stmts,
                       std::shared_ptr<Environment>              newEnv);
+    void Resolve(const Expr& expr, int depth);
     /*
      * Statement visitor
      */
