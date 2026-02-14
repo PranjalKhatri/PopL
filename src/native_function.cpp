@@ -14,7 +14,7 @@ PopLObject NativeFunction::Call(Interpreter&                   interpreter,
 }
 
 std::string NativeFunction::ToString() const {
-    return "<native fn " + m_name + ">";
+    return std::format("<native fn {} (arity:{})>", m_name, m_arity);
 }
 
 }  // namespace popl::callable
