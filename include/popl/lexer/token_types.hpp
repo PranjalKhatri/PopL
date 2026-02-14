@@ -48,7 +48,6 @@ enum class TokenType {
     IF,
     NIL,
     OR,
-    PRINT,
     RETURN,
     SUPER,
     THIS,
@@ -68,7 +67,7 @@ struct Keyword {
     TokenType        type;
 };
 
-constexpr std::array<Keyword, 18> Keywords = {{
+constexpr std::array<Keyword, 17> Keywords = {{
 
     {"and", TokenType::AND},
     {"class", TokenType::CLASS},
@@ -79,7 +78,6 @@ constexpr std::array<Keyword, 18> Keywords = {{
     {"if", TokenType::IF},
     {"nil", TokenType::NIL},
     {"or", TokenType::OR},
-    {"print", TokenType::PRINT},
     {"return", TokenType::RETURN},
     {"super", TokenType::SUPER},
     {"this", TokenType::THIS},
