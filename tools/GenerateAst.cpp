@@ -163,7 +163,6 @@ int main(int argc, char** argv) {
         std::format("Block{}: std::vector<std::unique_ptr<{}>> statements",
                     stmtBaseName, stmtBaseName),
         std::format("Expression{}: {}* expression", stmtBaseName, exprBaseName),
-        std::format("Print{}: {}* expression", stmtBaseName, exprBaseName),
         std::format("Var{}: Token name, {}* initializer", stmtBaseName,
                     exprBaseName),
         std::format("Assign{}: Token name, {}* value", stmtBaseName,

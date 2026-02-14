@@ -20,10 +20,6 @@ struct ExpressionStmt {
     std::unique_ptr<Expr> expression;
 };
 
-struct PrintStmt {
-    std::unique_ptr<Expr> expression;
-};
-
 struct VarStmt {
     Token                 name;
     std::unique_ptr<Expr> initializer;
@@ -64,10 +60,9 @@ struct ReturnStmt {
 };
 
 struct Stmt {
-    using Variant =
-        std::variant<NilStmt, BlockStmt, ExpressionStmt, PrintStmt, VarStmt,
-                     AssignStmt, IfStmt, WhileStmt, BreakStmt, ContinueStmt,
-                     FunctionStmt, ReturnStmt>;
+    using Variant = std::variant<NilStmt, BlockStmt, ExpressionStmt, VarStmt,
+                                 AssignStmt, IfStmt, WhileStmt, BreakStmt,
+                                 ContinueStmt, FunctionStmt, ReturnStmt>;
 
     Variant node;
 };

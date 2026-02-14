@@ -5,12 +5,11 @@ funcDecl          -> "fun" function;
 function          -> IDENTIFIER "(" parameters? ")" block ;
 parameters        -> IDENTIFIER ( "," IDENTIFIER ) ;
 varDecl           -> "var" IDENTIFIER ( "=" expression )? ";" ;
-statement         -> assignment | exprStatement | printStatement | block | ifStatement 
+statement         -> assignment | exprStatement | block | ifStatement 
                      | whileStatement | forStatement | breakStatement | continueStatement | returnStatement ;
 
 assignment        -> IDENTIFIER "=" expression ";" ;
 exprStatement     -> expression ";" ;
-printStatement    -> "print" expression ";" ;
 block             -> "{" declaration* "}" ;
 ifStatement       -> "if" "(" expression ")" statement ("else" statement)? ;
 whileStatement    -> "while" "(" expression ")" statement ;
