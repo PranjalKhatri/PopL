@@ -3,6 +3,7 @@
 #include <format>
 #include <memory>
 #include <print>
+#include <variant>
 
 #include "popl/callables/callable.hpp"
 #include "popl/callables/popl_function.hpp"
@@ -21,7 +22,17 @@ void Interpreter::Interpret(std::vector<std::unique_ptr<Stmt>>& statements,
     m_repl_mode = replMode;
     try {
         for (auto& statement : statements) {
-            Execute(*statement);
+            {
+                if (replMode &&
+                    std::holds_alternative<FunctionStmt>(statement->node)) {
+                    // Move into persistent storage
+                    m_persistent_statements.emplace_back(std::move(statement));
+                    // execute stored one
+                    Execute(*m_persistent_statements.back());
+                } else {  // normal execution
+                    Execute(*statement);
+                }
+            }
         }
     } catch (const runtime::RunTimeError& error) {
         Diagnostics::ReportRunTimeError(error);
@@ -85,7 +96,7 @@ void Interpreter::operator()(WhileStmt& stmt, const Stmt&) {
 void Interpreter::operator()(FunctionStmt& stmt, const Stmt&) {
     Token name = stmt.name;
     auto  func = std::make_shared<callable::PoplFunction>(
-        *stmt.func, m_current_environment, stmt.name.GetLexeme());
+        stmt.func.get(), m_current_environment, stmt.name.GetLexeme());
     m_current_environment->Define(name, PopLObject{func});
 }
 
@@ -140,7 +151,7 @@ PopLObject Interpreter::operator()(const CallExpr& expr, const Expr&) {
 
 PopLObject Interpreter::operator()(const FunctionExpr& expr, const Expr&) {
     auto function = std::make_shared<callable::PoplFunction>(
-        expr, m_current_environment, std::nullopt);
+        &expr, m_current_environment, std::nullopt);
 
     return PopLObject{function};
 }

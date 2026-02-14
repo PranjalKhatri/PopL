@@ -70,6 +70,9 @@ class Interpreter {
    private:
     std::shared_ptr<Environment>         m_global_environment{};
     std::shared_ptr<Environment>         m_current_environment{};
+    // function etc. which need to be kept at the same location after resolving
+    // and can't be deleted till program termination
+    std::vector<std::unique_ptr<Stmt>>   m_persistent_statements{};
     std::unordered_map<const Expr*, int> m_locals{};
     bool                                 m_repl_mode{false};
 };
