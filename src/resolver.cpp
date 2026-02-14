@@ -102,9 +102,6 @@ void Resolver::operator()(const FunctionStmt& stmt, const Stmt&) {
 void Resolver::operator()(const ExpressionStmt& stmt, const Stmt&) {
     Resolve(*stmt.expression);
 }
-void Resolver::operator()(const PrintStmt& stmt, const Stmt&) {
-    Resolve(*stmt.expression);
-}
 void Resolver::operator()(const IfStmt& stmt, const Stmt&) {
     Resolve(*stmt.condition);
     Resolve(*stmt.thenBranch);

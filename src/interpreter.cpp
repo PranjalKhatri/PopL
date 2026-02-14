@@ -38,11 +38,6 @@ void Interpreter::operator()(const ExpressionStmt& stmt, const Stmt&) {
         std::println("Expression returned: {}", obj.toString());
     }
 }
-void Interpreter::operator()(const PrintStmt& stmt, const Stmt&) {
-    PopLObject value = Evaluate(*(stmt.expression));
-    CheckUninitialised(MakeReplReadToken("Print"), value);
-    println("{}", value.toString());
-}
 void Interpreter::operator()(const NilStmt& stmt, const Stmt&) {
     // Yeah.. do nothing
 }

@@ -9,7 +9,6 @@ class Resolver {
     void Resolve(const std::vector<std::unique_ptr<Stmt>>& statements);
 
     void operator()(const ExpressionStmt& stmt, const Stmt& originalStmt);
-    void operator()(const PrintStmt& stmt, const Stmt&);
     void operator()(const NilStmt& stmt, const Stmt&);
     void operator()(const VarStmt& stmt, const Stmt&);
     void operator()(const BlockStmt& stmt, const Stmt&);

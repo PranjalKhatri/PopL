@@ -101,12 +101,6 @@ struct StmtCloner {
                          : nullptr}};
     }
 
-    Stmt operator()(const PrintStmt& s) const {
-        return Stmt{PrintStmt{s.expression
-                                  ? std::make_unique<Expr>(Clone(*s.expression))
-                                  : nullptr}};
-    }
-
     Stmt operator()(const VarStmt& s) const {
         return Stmt{VarStmt{s.name, s.initializer ? std::make_unique<Expr>(
                                                         Clone(*s.initializer))
