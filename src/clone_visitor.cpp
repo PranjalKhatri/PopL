@@ -1,5 +1,8 @@
 #include "popl/syntax/visitors/clone_visitor.hpp"
 
+#include "popl/syntax/ast/expr.hpp"
+#include "popl/syntax/ast/stmt.hpp"
+
 namespace popl {
 
 struct ExprCloner;
@@ -77,7 +80,7 @@ struct ExprCloner {
     }
 };
 
-Expr Clone(const Expr& expr) { return visitExpr(expr, ExprCloner{}); }
+Expr Clone(const Expr& expr) { return visitExprWithArgs(expr, ExprCloner{}); }
 
 // Statement Cloner
 struct StmtCloner {
@@ -152,6 +155,6 @@ struct StmtCloner {
     }
 };
 
-Stmt Clone(const Stmt& stmt) { return visitStmt(stmt, StmtCloner{}); }
+Stmt Clone(const Stmt& stmt) { return visitStmtWithArgs(stmt, StmtCloner{}); }
 
 }  // namespace popl
