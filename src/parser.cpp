@@ -66,7 +66,6 @@ Stmt Parser::Statement() {
     if (Match({TokenType::WHILE})) return WhileStatement();
     if (Match({TokenType::FOR})) return ForStatement();
     if (Match({TokenType::IF})) return IfStatement();
-    if (Match({TokenType::PRINT})) return PrintStatement();
     if (Match({TokenType::BREAK})) return BreakStatement();
     if (Match({TokenType::CONTINUE})) return ContinueStatement();
     if (Match({TokenType::RETURN})) return ReturnStatement();
@@ -171,12 +170,6 @@ Stmt Parser::IfStatement() {
                        MakeStmtPtr(std::move(thenBranch)),
                        MakeStmtPtr(std::move(elseBranch))}};
 }
-Stmt Parser::PrintStatement() {
-    auto value = MakeExprPtr(Expression());
-    Consume(TokenType::SEMICOLON, "Expect ; after value.");
-    return Stmt{PrintStmt{std::move(value)}};
-}
-
 Stmt Parser::AssignmentStatement() {
     Token name = Previous();
     Consume(TokenType::EQUAL, "Expects = after an identifier name");
@@ -213,7 +206,6 @@ void Parser::Synchronize() {
             case TokenType::FOR:
             case TokenType::IF:
             case TokenType::WHILE:
-            case TokenType::PRINT:
             case TokenType::RETURN:
                 return;
             default:
