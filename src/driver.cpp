@@ -9,6 +9,7 @@
 #include "popl/diagnostics.hpp"
 #include "popl/lexer/lexer.hpp"
 #include "popl/syntax/grammar/parser.hpp"
+#include "popl/syntax/visitors/resolver.hpp"
 #include "popl/utils.hpp"
 
 namespace popl {
@@ -51,11 +52,17 @@ int Driver::RunFile(std::string_view path) {
 }
 
 void Driver::Run(std::string source, bool replMode) {
-    Lexer  lexer{std::move(source)};
-    auto   tokens{lexer.ScanTokens()};
+    Lexer lexer{std::move(source)};
+    auto  tokens{lexer.ScanTokens()};
+
     Parser parser{tokens};
     auto   statements = parser.Parse();
+
     if (Diagnostics::HadError()) return;
+
+    Resolver resolver{interpreter};
+    resolver.Resolve(statements);
+
     interpreter.Interpret(statements, replMode);
 }
 };  // namespace popl
