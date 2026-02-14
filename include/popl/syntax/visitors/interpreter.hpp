@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "popl/callables/native_registry.hpp"
 #include "popl/environment.hpp"
 #include "popl/literal.hpp"
 #include "popl/syntax/ast/expr.hpp"
@@ -13,7 +14,9 @@ class Interpreter {
    public:
     Interpreter()
         : m_global_environment{std::make_shared<Environment>()},
-          m_current_environment{m_global_environment} {}
+          m_current_environment{m_global_environment} {
+        NativeRegistry::RegisterAll(*this);
+    }
     void Interpret(std::vector<Stmt>& statements, bool replMode);
     std::shared_ptr<Environment> GetGlobalEnvironment() {
         return m_global_environment;
