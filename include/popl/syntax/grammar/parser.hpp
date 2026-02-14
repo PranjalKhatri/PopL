@@ -18,7 +18,7 @@ class ParseError : public std::runtime_error {
 class Parser {
    public:
     Parser(std::vector<Token> tokens) : m_tokens{std::move(tokens)} {}
-    std::vector<Stmt> Parse();
+    std::vector<std::unique_ptr<Stmt>> Parse();
 
    private:
     // Checks current token type against given type

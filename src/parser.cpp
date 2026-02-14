@@ -10,9 +10,9 @@
 
 namespace popl {
 
-std::vector<Stmt> Parser::Parse() {
-    std::vector<Stmt> statements{};
-    while (!IsAtEnd()) statements.emplace_back(Declaration());
+std::vector<std::unique_ptr<Stmt>> Parser::Parse() {
+    std::vector<std::unique_ptr<Stmt>> statements{};
+    while (!IsAtEnd()) statements.emplace_back(MakeStmtPtr(Declaration()));
     return statements;
 }
 Stmt Parser::Declaration() {
