@@ -3,7 +3,6 @@
 #include <format>
 #include <memory>
 #include <print>
-#include <variant>
 
 #include "popl/callables/callable.hpp"
 #include "popl/callables/popl_function.hpp"
@@ -116,7 +115,9 @@ PopLObject Interpreter::operator()(const TernaryExpr& expr, const Expr&) {
 }
 PopLObject Interpreter::operator()(const VariableExpr& expr,
                                    const Expr&         originalExpr) const {
-    return LookUpVariable(expr.name, originalExpr);
+    if (expr.depth.has_value())
+        return m_current_environment->GetAt(expr.depth.value(), expr.name);
+    return m_global_environment->Get(expr.name);
 }
 PopLObject Interpreter::operator()(const NilExpr& expr, const Expr&) const {
     return PopLObject{NilValue{}};
