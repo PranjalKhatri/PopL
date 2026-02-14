@@ -22,16 +22,13 @@ void Interpreter::Interpret(std::vector<std::unique_ptr<Stmt>>& statements,
     m_repl_mode = replMode;
     try {
         for (auto& statement : statements) {
-            {
-                if (replMode &&
-                    std::holds_alternative<FunctionStmt>(statement->node)) {
-                    // Move into persistent storage
-                    m_persistent_statements.emplace_back(std::move(statement));
-                    // execute stored one
-                    Execute(*m_persistent_statements.back());
-                } else {  // normal execution
-                    Execute(*statement);
-                }
+            if (replMode) {
+                // Move into persistent storage
+                m_persistent_statements.emplace_back(std::move(statement));
+                // execute stored one
+                Execute(*m_persistent_statements.back());
+            } else {  // normal execution
+                Execute(*statement);
             }
         }
     } catch (const runtime::RunTimeError& error) {
