@@ -7,6 +7,7 @@
 #include "popl/diagnostics.hpp"
 #include "popl/syntax/ast/expr.hpp"
 #include "popl/syntax/ast/stmt.hpp"
+#include "popl/syntax/visitors/interpreter.hpp"
 
 namespace popl {
 
