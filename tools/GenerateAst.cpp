@@ -192,7 +192,10 @@ int main(int argc, char** argv) {
         std::format("Function{}: Token name, std::unique_ptr<Function{}> func",
                     stmtBaseName, exprBaseName),
         std::format("Return{}: Token keyword, {}* value", stmtBaseName,
-                    exprBaseName)};
+                    exprBaseName),
+        std::format("Class{}: Token name, "
+                    "std::vector<std::unique_ptr<Function{}>> methods",
+                    stmtBaseName, stmtBaseName)};
 
     DefineAst(exprBaseName, outputDir, ExprTypes);
     DefineAst(stmtBaseName, outputDir, StmtTypes);

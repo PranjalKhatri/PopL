@@ -59,10 +59,16 @@ struct ReturnStmt {
     std::unique_ptr<Expr> value;
 };
 
+struct ClassStmt {
+    Token                                      name;
+    std::vector<std::unique_ptr<FunctionStmt>> methods;
+};
+
 struct Stmt {
-    using Variant = std::variant<NilStmt, BlockStmt, ExpressionStmt, VarStmt,
-                                 AssignStmt, IfStmt, WhileStmt, BreakStmt,
-                                 ContinueStmt, FunctionStmt, ReturnStmt>;
+    using Variant =
+        std::variant<NilStmt, BlockStmt, ExpressionStmt, VarStmt, AssignStmt,
+                     IfStmt, WhileStmt, BreakStmt, ContinueStmt, FunctionStmt,
+                     ReturnStmt, ClassStmt>;
 
     Variant node;
 };

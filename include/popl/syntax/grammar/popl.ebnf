@@ -1,5 +1,5 @@
 program           -> declaration* EOF ;
-declaration       -> varDecl | statement | funcDecl;
+declaration       -> varDecl | statement | funcDecl | classDecl;
 
 funcDecl          -> "fun" function;
 function          -> IDENTIFIER "(" parameters? ")" block ;
