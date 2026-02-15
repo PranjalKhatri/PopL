@@ -62,7 +62,7 @@ class Resolver {
     void Define(const Token& name);
 
     void ResolveLocal(VariableExpr& expr, const Token& name);
-    void ResolveFunction(FunctionStmt& stmt, FunctionType type);
+    void ResolveFunction(FunctionExpr& expr, FunctionType type);
 
     void Resolve(Stmt& statement);
     void Resolve(Expr& expr);

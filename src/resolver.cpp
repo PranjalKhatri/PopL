@@ -70,17 +70,17 @@ void Resolver::ResolveLocal(VariableExpr& expr, const Token& name) {
     }
 }
 
-void Resolver::ResolveFunction(FunctionStmt& stmt, FunctionType funcType) {
+void Resolver::ResolveFunction(FunctionExpr& expr, FunctionType funcType) {
     ScopeGuard guard(m_scopes);
 
     FunctionType enclosingFunction = m_current_function_type;
     m_current_function_type        = funcType;
 
-    for (Token& param : stmt.func->params) {
+    for (Token& param : expr.params) {
         Declare(param);
         Define(param);
     }
-    Resolve(stmt.func->body);
+    Resolve(expr.body);
     m_current_function_type = enclosingFunction;
 }
 
@@ -107,7 +107,7 @@ void Resolver::operator()(AssignStmt& stmt, Stmt&) {
 void Resolver::operator()(FunctionStmt& stmt, Stmt&) {
     Declare(stmt.name);
     Define(stmt.name);
-    ResolveFunction(stmt, FunctionType::FUNCTION);
+    ResolveFunction(*stmt.func, FunctionType::FUNCTION);
 }
 
 void Resolver::operator()(ExpressionStmt& stmt, Stmt&) {
@@ -161,7 +161,9 @@ void Resolver::operator()(CallExpr& expr, Expr&) {
     Resolve(*expr.callee);
     for (auto& arg : expr.arguments) Resolve(*arg);
 }
-void Resolver::operator()(FunctionExpr& expr, Expr&) {}
+void Resolver::operator()(FunctionExpr& expr, Expr&) {
+    ResolveFunction(expr, FunctionType::FUNCTION);
+}
 void Resolver::operator()(LogicalExpr& expr, Expr&) {
     Resolve(*expr.left);
     Resolve(*expr.right);
