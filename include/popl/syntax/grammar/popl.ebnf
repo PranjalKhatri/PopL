@@ -1,6 +1,7 @@
 program           -> declaration* EOF ;
 declaration       -> varDecl | statement | funcDecl | classDecl;
 
+classDecl         -> "class" IDENTIFIER "{" function* "}" ;
 funcDecl          -> "fun" function;
 function          -> IDENTIFIER "(" parameters? ")" block ;
 parameters        -> IDENTIFIER ( "," IDENTIFIER ) ;
