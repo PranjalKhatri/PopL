@@ -67,26 +67,25 @@ struct Keyword {
     TokenType        type;
 };
 
-constexpr std::array<Keyword, 17> Keywords = {{
-
-    {"and", TokenType::AND},
-    {"class", TokenType::CLASS},
-    {"else", TokenType::ELSE},
-    {"false", TokenType::FALSE},
-    {"for", TokenType::FOR},
-    {"fun", TokenType::FUN},
-    {"if", TokenType::IF},
-    {"nil", TokenType::NIL},
-    {"or", TokenType::OR},
-    {"return", TokenType::RETURN},
-    {"super", TokenType::SUPER},
-    {"this", TokenType::THIS},
-    {"true", TokenType::TRUE},
-    {"var", TokenType::VAR},
-    {"while", TokenType::WHILE},
-    {"break", TokenType::BREAK},
-    {"continue", TokenType::CONTINUE},
-}};
+constexpr std::array Keywords{
+    Keyword{"and", TokenType::AND},
+    Keyword{"class", TokenType::CLASS},
+    Keyword{"else", TokenType::ELSE},
+    Keyword{"false", TokenType::FALSE},
+    Keyword{"for", TokenType::FOR},
+    Keyword{"fun", TokenType::FUN},
+    Keyword{"if", TokenType::IF},
+    Keyword{"nil", TokenType::NIL},
+    Keyword{"or", TokenType::OR},
+    Keyword{"return", TokenType::RETURN},
+    Keyword{"super", TokenType::SUPER},
+    Keyword{"this", TokenType::THIS},
+    Keyword{"true", TokenType::TRUE},
+    Keyword{"var", TokenType::VAR},
+    Keyword{"while", TokenType::WHILE},
+    Keyword{"break", TokenType::BREAK},
+    Keyword{"continue", TokenType::CONTINUE},
+};
 
 constexpr TokenType KeywordOrIdentifier(std::string_view s) {
     for (const auto& [kw, type] : Keywords) {
