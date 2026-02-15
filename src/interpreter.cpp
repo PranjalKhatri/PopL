@@ -42,7 +42,7 @@ void Interpreter::operator()(const ExpressionStmt& stmt, const Stmt&) {
     PopLObject obj = Evaluate(*(stmt.expression));
     if (m_repl_mode) {
         CheckUninitialised(MakeReplReadToken(), obj);
-        std::println("Expression returned: {}", obj.toString());
+        if (!obj.isNil()) std::println("{}", obj.toString());
     }
 }
 void Interpreter::operator()(const NilStmt& stmt, const Stmt&) {
