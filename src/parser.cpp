@@ -18,6 +18,7 @@ std::vector<std::unique_ptr<Stmt>> Parser::Parse() {
 Stmt Parser::Declaration() {
     try {
         if (Match({TokenType::VAR})) return VarDeclaration();
+        if (Match({TokenType::CLASS})) return ClassDeclaration();
         if (Peek().GetType() == TokenType::FUN &&
             PeekNext().GetType() == TokenType::IDENTIFIER) {
             Advance();  // consume FUN
@@ -28,6 +29,24 @@ Stmt Parser::Declaration() {
         Synchronize();
         return Stmt{NilStmt()};
     }
+}
+
+Stmt Parser::ClassDeclaration() {
+    Token name = Consume(TokenType::IDENTIFIER, "Expect class name.");
+    Consume(TokenType::LEFT_BRACE, "Expect '{' before class body.");
+
+    std::vector<std::unique_ptr<FunctionStmt>> methods{};
+
+    while (!Check(TokenType::RIGHT_BRACE) && !IsAtEnd()) {
+        Stmt methodStmt = FunctionDeclaration("method");
+
+        methods.emplace_back(std::make_unique<FunctionStmt>(
+            std::move(std::get<FunctionStmt>(methodStmt.node))));
+    }
+
+    Consume(TokenType::RIGHT_BRACE, "Expect '}' after class body.");
+
+    return Stmt{ClassStmt{std::move(name), std::move(methods)}};
 }
 
 Stmt Parser::FunctionDeclaration(std::string_view kind) {

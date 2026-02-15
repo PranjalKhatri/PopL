@@ -65,6 +65,7 @@ class Parser {
 
     Stmt Statement();
     Stmt Declaration();
+    Stmt ClassDeclaration();
     Stmt FunctionDeclaration(std::string_view kind);
     Stmt VarDeclaration();
     Stmt ExpressionStatement();
