@@ -62,10 +62,15 @@ struct FunctionExpr {
     std::vector<std::unique_ptr<Stmt>> body;
 };
 
+struct GetExpr {
+    std::unique_ptr<Expr> object;
+    Token                 name;
+};
+
 struct Expr {
     using Variant = std::variant<NilExpr, BinaryExpr, TernaryExpr, GroupingExpr,
                                  LiteralExpr, UnaryExpr, CallExpr, VariableExpr,
-                                 LogicalExpr, FunctionExpr>;
+                                 LogicalExpr, FunctionExpr, GetExpr>;
 
     Variant node;
 };

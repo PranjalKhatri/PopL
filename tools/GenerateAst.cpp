@@ -173,7 +173,9 @@ int main(int argc, char** argv) {
                     exprBaseName, exprBaseName),
         std::format("Function{}: std::vector<Token> params, "
                     "std::vector<std::unique_ptr<{}>> body",
-                    exprBaseName, stmtBaseName)};
+                    exprBaseName, stmtBaseName),
+        std::format("Get{}: {}* object, Token name", exprBaseName,
+                    exprBaseName)};
 
     std::vector<std::string> StmtTypes = {
         std::format("Block{}: std::vector<std::unique_ptr<{}>> statements",
