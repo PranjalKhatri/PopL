@@ -56,7 +56,7 @@ class PopLObject {
         return std::get<std::string>(m_data);
     }
     CallablePtr asCallable() const { return std::get<CallablePtr>(m_data); }
-    InstancePtr asClass() const { return std::get<InstancePtr>(m_data); }
+    InstancePtr asInstance() const { return std::get<InstancePtr>(m_data); }
     bool        asBool() const { return std::get<bool>(m_data); }
 
     bool isTruthy() const {
@@ -83,7 +83,7 @@ class PopLObject {
                     if (s.back() == '.') s.pop_back();
                     return s;
                 } else if constexpr (std::is_same_v<T, InstancePtr>) {
-                    return v ? v->ToString() : "<null class>";
+                    return v ? v->ToString() : "<null instance>";
                 } else
                     return v;
             },
