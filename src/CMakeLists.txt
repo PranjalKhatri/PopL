@@ -11,6 +11,7 @@ add_executable(PopL
                 native_function.cpp
                 native_registry.cpp
                 resolver.cpp
+                popl_class.cpp
 )
 
 target_include_directories(PopL
