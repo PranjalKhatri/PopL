@@ -6,6 +6,7 @@
 #include <variant>
 
 #include "popl/callables/callable.hpp"
+#include "popl/runtime/popl_instance.hpp"
 
 namespace popl {
 struct UninitializedValue {};
@@ -19,8 +20,9 @@ inline bool operator==(const NilValue&, const NilValue&) { return false; }
 class PopLObject {
    public:
     using CallablePtr = std::shared_ptr<callable::PoplCallable>;
+    using InstancePtr = std::shared_ptr<runtime::PoplInstance>;
     using Value       = std::variant<UninitializedValue, NilValue, double,
-                                     std::string, bool, CallablePtr>;
+                                     std::string, bool, CallablePtr, InstancePtr>;
 
     explicit PopLObject(UninitializedValue v) : m_data(v) {}
     explicit PopLObject(NilValue n) : m_data{n} {}
@@ -29,6 +31,7 @@ class PopLObject {
     explicit PopLObject(const std::string& str) : m_data(str) {}
     explicit PopLObject(std::string&& str) : m_data(std::move(str)) {}
     explicit PopLObject(CallablePtr ptr) : m_data(ptr) {}
+    explicit PopLObject(InstancePtr ptr) : m_data(ptr) {}
 
     // type checks
     bool isNil() const { return std::holds_alternative<NilValue>(m_data); }
@@ -43,6 +46,9 @@ class PopLObject {
     bool isCallable() const {
         return std::holds_alternative<CallablePtr>(m_data);
     }
+    bool isInstance() const {
+        return std::holds_alternative<InstancePtr>(m_data);
+    }
 
     // accessors throws on misuse
     double             asNumber() const { return std::get<double>(m_data); }
@@ -50,6 +56,7 @@ class PopLObject {
         return std::get<std::string>(m_data);
     }
     CallablePtr asCallable() const { return std::get<CallablePtr>(m_data); }
+    InstancePtr asClass() const { return std::get<InstancePtr>(m_data); }
     bool        asBool() const { return std::get<bool>(m_data); }
 
     bool isTruthy() const {
@@ -75,6 +82,8 @@ class PopLObject {
                     s.erase(s.find_last_not_of('0') + 1);
                     if (s.back() == '.') s.pop_back();
                     return s;
+                } else if constexpr (std::is_same_v<T, InstancePtr>) {
+                    return v ? v->ToString() : "<null class>";
                 } else
                     return v;
             },
