@@ -286,11 +286,20 @@ Expr Parser::CallExpression() {
     Expr expr{Primary()};
     while (true) {
         if (Match({TokenType::LEFT_PAREN})) {
-            expr.node.emplace<CallExpr>(FinishCall(std::move(expr)));
+            Expr callee = std::move(expr);
+            expr.node.emplace<CallExpr>(FinishCall(std::move(callee)));
+
+        } else if (Match({TokenType::DOT})) {
+            Token name   = Consume(TokenType::IDENTIFIER,
+                                   "Expect property name after '.'");
+            Expr  object = std::move(expr);
+            expr.node.emplace<GetExpr>(MakeExprPtr(std::move(object)), name);
+
         } else {
             break;
         }
     }
+
     return expr;
 }
 CallExpr Parser::FinishCall(Expr callee) {
