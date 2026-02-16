@@ -41,6 +41,7 @@ class Interpreter {
     void operator()(const ContinueStmt& stmt, const Stmt&);
     void operator()(const ReturnStmt& stmt, const Stmt&);
     void operator()(FunctionStmt& stmt, const Stmt&);
+    void operator()(ClassStmt& stmt, const Stmt&);
 
     /*
      * Expression visitor

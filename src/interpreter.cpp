@@ -10,6 +10,7 @@
 #include "popl/lexer/token_types.hpp"
 #include "popl/literal.hpp"
 #include "popl/runtime/control_flow.hpp"
+#include "popl/runtime/popl_class.hpp"
 #include "popl/runtime/run_time_error.hpp"
 #include "popl/syntax/ast/expr.hpp"
 #include "popl/syntax/ast/stmt.hpp"
@@ -94,6 +95,11 @@ void Interpreter::operator()(FunctionStmt& stmt, const Stmt&) {
     auto  func = std::make_shared<callable::PoplFunction>(
         stmt.func.get(), m_current_environment, stmt.name.GetLexeme());
     m_current_environment->Define(name, PopLObject{func});
+}
+void Interpreter::operator()(ClassStmt& stmt, const Stmt&) {
+    m_current_environment->Define(stmt.name, PopLObject(NilValue{}));
+    auto klass = std::make_shared<runtime::PoplClass>(stmt.name.GetLexeme());
+    m_current_environment->Assign(stmt.name, PopLObject{klass});
 }
 
 /*

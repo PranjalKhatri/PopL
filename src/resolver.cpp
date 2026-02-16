@@ -109,6 +109,10 @@ void Resolver::operator()(FunctionStmt& stmt, Stmt&) {
     Define(stmt.name);
     ResolveFunction(*stmt.func, FunctionType::FUNCTION);
 }
+void Resolver::operator()(ClassStmt& stmt, Stmt&) {
+    Declare(stmt.name);
+    Define(stmt.name);
+}
 
 void Resolver::operator()(ExpressionStmt& stmt, Stmt&) {
     Resolve(*stmt.expression);

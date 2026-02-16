@@ -24,6 +24,7 @@ class Resolver {
     void operator()(ContinueStmt& stmt, Stmt&);
     void operator()(ReturnStmt& stmt, Stmt&);
     void operator()(FunctionStmt& stmt, Stmt&);
+    void operator()(ClassStmt& stmt, Stmt&);
 
     //  Expression visitors
     void operator()(LiteralExpr& expr, Expr& originalExpr);
