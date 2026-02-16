@@ -3,11 +3,13 @@
 #include "popl/literal.hpp"
 #include "popl/runtime/popl_instance.hpp"
 
-namespace popl::runtime {
-PopLObject PoplClass::Call(Interpreter&                   interpreter,
-                           const std::vector<PopLObject>& args) {
+namespace popl {
+namespace runtime {
+popl::PopLObject PoplClass::Call(popl::Interpreter& interpreter,
+                                 const std::vector<popl::PopLObject>& args) {
     auto instance = std::make_shared<PoplInstance>(shared_from_this());
 
-    return PopLObject{instance};
+    return popl::PopLObject{instance};
 }
-}  // namespace popl::runtime
+}  // namespace runtime
+}  // namespace popl
