@@ -185,6 +185,12 @@ PopLObject Interpreter::operator()(const UnaryExpr& expr, const Expr&) {
     return PopLObject{NilValue{}};
 }
 
+PopLObject Interpreter::operator()(const GetExpr& expr, const Expr&) {
+    auto obj{Evaluate(*expr.object)};
+    if (obj.isInstance()) return obj.asInstance()->get(expr.name);
+    throw runtime::RunTimeError(expr.name, "Only instances have properties.");
+}
+
 PopLObject Interpreter::operator()(const BinaryExpr& expr, const Expr&) {
     PopLObject left  = Evaluate(*expr.left);
     PopLObject right = Evaluate(*expr.right);
