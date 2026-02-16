@@ -153,6 +153,13 @@ struct StmtCloner {
             s.keyword,
             s.value ? std::make_unique<Expr>(Clone(*s.value)) : nullptr}};
     }
+    Stmt operator()(const ClassStmt& s) const {
+        std::vector<std::unique_ptr<FunctionStmt>> methods;
+        for (const auto& m : s.methods)
+            methods.emplace_back(std::make_unique<FunctionStmt>(
+                std::get<FunctionStmt>(operator()(*m).node)));
+        return Stmt{ClassStmt{s.name, std::move(methods)}};
+    }
 };
 
 Stmt Clone(const Stmt& stmt) { return visitStmtWithArgs(stmt, StmtCloner{}); }
