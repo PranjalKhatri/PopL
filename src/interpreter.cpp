@@ -187,7 +187,7 @@ PopLObject Interpreter::operator()(const UnaryExpr& expr, const Expr&) {
 
 PopLObject Interpreter::operator()(const GetExpr& expr, const Expr&) {
     auto obj{Evaluate(*expr.object)};
-    if (obj.isInstance()) return obj.asInstance()->get(expr.name);
+    if (obj.isInstance()) return obj.asInstance()->Get(expr.name);
     throw runtime::RunTimeError(expr.name, "Only instances have properties.");
 }
 
