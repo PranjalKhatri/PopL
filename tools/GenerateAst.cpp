@@ -197,7 +197,9 @@ int main(int argc, char** argv) {
                     exprBaseName),
         std::format("Class{}: Token name, "
                     "std::vector<std::unique_ptr<Function{}>> methods",
-                    stmtBaseName, stmtBaseName)};
+                    stmtBaseName, stmtBaseName),
+        std::format("Set{}: {}* object, Token name, {}* value", stmtBaseName,
+                    exprBaseName, exprBaseName)};
 
     DefineAst(exprBaseName, outputDir, ExprTypes);
     DefineAst(stmtBaseName, outputDir, StmtTypes);

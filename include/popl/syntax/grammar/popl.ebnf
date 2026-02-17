@@ -9,7 +9,7 @@ varDecl           -> "var" IDENTIFIER ( "=" expression )? ";" ;
 statement         -> assignment | exprStatement | block | ifStatement 
                      | whileStatement | forStatement | breakStatement | continueStatement | returnStatement ;
 
-assignment        -> IDENTIFIER "=" expression ";" ;
+assignment        -> ( call "." )? IDENTIFIER "=" expression ";" ;
 exprStatement     -> expression ";" ;
 block             -> "{" declaration* "}" ;
 ifStatement       -> "if" "(" expression ")" statement ("else" statement)? ;
