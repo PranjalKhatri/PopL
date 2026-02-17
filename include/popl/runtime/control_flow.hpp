@@ -10,7 +10,7 @@ struct ContinueSignal {};
 
 /// ReturnSignal carries a value for `return`.
 struct ReturnSignal {
-    PopLObject value;
+    popl::PopLObject value;
 };
 
 };  // namespace popl::runtime::control_flow
