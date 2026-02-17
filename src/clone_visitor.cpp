@@ -1,5 +1,7 @@
 #include "popl/syntax/visitors/clone_visitor.hpp"
 
+#include <memory>
+
 #include "popl/syntax/ast/expr.hpp"
 #include "popl/syntax/ast/stmt.hpp"
 
@@ -77,6 +79,9 @@ struct ExprCloner {
         }
 
         return Expr{FunctionExpr{e.params, std::move(body)}};
+    }
+    Expr operator()(const GetExpr& e) const {
+        return Expr{GetExpr{std::make_unique<Expr>(Clone(*e.object)), e.name}};
     }
 };
 
