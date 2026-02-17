@@ -4,9 +4,10 @@
 #include <string>
 
 #include "popl/callables/callable.hpp"
+
 namespace popl {
 namespace runtime {
-class PoplClass : public callable::PoplCallable,
+class PoplClass : public popl::callable::PoplCallable,
                   public std::enable_shared_from_this<PoplClass> {
    public:
     PoplClass(std::string name) : m_name(std::move(name)) {}
