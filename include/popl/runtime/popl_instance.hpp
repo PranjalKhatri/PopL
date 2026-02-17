@@ -6,7 +6,8 @@
 
 namespace popl {
 class Token;
-};
+class PopLObject;
+};  // namespace popl
 
 namespace popl::runtime {
 
@@ -18,12 +19,12 @@ class PoplInstance {
     explicit PoplInstance(std::shared_ptr<PoplClass> klass)
         : m_creator(klass) {}
 
-    const PopLObject& Get(const popl::Token& name);
+    const popl::PopLObject& Get(const popl::Token& name);
 
     std::string ToString() const;
 
    private:
-    std::shared_ptr<PoplClass>                  m_creator;
-    std::unordered_map<std::string, PopLObject> m_fields;
+    std::shared_ptr<PoplClass>                        m_creator;
+    std::unordered_map<std::string, popl::PopLObject> m_fields;
 };
 };  // namespace popl::runtime
