@@ -16,8 +16,9 @@ class PoplCallable {
 
     virtual int GetArity() const = 0;
 
-    virtual PopLObject Call(Interpreter&                   interpreter,
-                            const std::vector<PopLObject>& args) = 0;
+    virtual popl::PopLObject Call(
+        popl::Interpreter&                   interpreter,
+        const std::vector<popl::PopLObject>& args) = 0;
 
     virtual std::string ToString() const = 0;
 };
