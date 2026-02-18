@@ -25,11 +25,6 @@ struct VarStmt {
     std::unique_ptr<Expr> initializer;
 };
 
-struct AssignStmt {
-    Token                 name;
-    std::unique_ptr<Expr> value;
-};
-
 struct IfStmt {
     std::unique_ptr<Expr> condition;
     std::unique_ptr<Stmt> thenBranch;
@@ -65,10 +60,9 @@ struct ClassStmt {
 };
 
 struct Stmt {
-    using Variant =
-        std::variant<NilStmt, BlockStmt, ExpressionStmt, VarStmt, AssignStmt,
-                     IfStmt, WhileStmt, BreakStmt, ContinueStmt, FunctionStmt,
-                     ReturnStmt, ClassStmt>;
+    using Variant = std::variant<NilStmt, BlockStmt, ExpressionStmt, VarStmt,
+                                 IfStmt, WhileStmt, BreakStmt, ContinueStmt,
+                                 FunctionStmt, ReturnStmt, ClassStmt>;
 
     Variant node;
 };

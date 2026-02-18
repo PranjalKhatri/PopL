@@ -67,10 +67,17 @@ struct GetExpr {
     Token                 name;
 };
 
+struct AssignExpr {
+    Token                 name;
+    std::unique_ptr<Expr> value;
+    std::optional<int>    depth;
+};
+
 struct Expr {
-    using Variant = std::variant<NilExpr, BinaryExpr, TernaryExpr, GroupingExpr,
-                                 LiteralExpr, UnaryExpr, CallExpr, VariableExpr,
-                                 LogicalExpr, FunctionExpr, GetExpr>;
+    using Variant =
+        std::variant<NilExpr, BinaryExpr, TernaryExpr, GroupingExpr,
+                     LiteralExpr, UnaryExpr, CallExpr, VariableExpr,
+                     LogicalExpr, FunctionExpr, GetExpr, AssignExpr>;
 
     Variant node;
 };
