@@ -197,6 +197,15 @@ PopLObject Interpreter::operator()(const GetExpr& expr, const Expr&) {
     throw runtime::RunTimeError(expr.name, "Only instances have properties.");
 }
 
+PopLObject Interpreter::operator()(const SetExpr& expr, const Expr&) {
+    PopLObject obj{Evaluate(*expr.object)};
+    if (!obj.isInstance())
+        throw runtime::RunTimeError(expr.name, "Only instances have fields.");
+    PopLObject value = Evaluate(*expr.value);
+    obj.asInstance()->Set(expr.name, value);
+    return value;
+}
+
 PopLObject Interpreter::operator()(const BinaryExpr& expr, const Expr&) {
     PopLObject left  = Evaluate(*expr.left);
     PopLObject right = Evaluate(*expr.right);

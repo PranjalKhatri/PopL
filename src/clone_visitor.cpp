@@ -83,6 +83,11 @@ struct ExprCloner {
     Expr operator()(const GetExpr& e) const {
         return Expr{GetExpr{std::make_unique<Expr>(Clone(*e.object)), e.name}};
     }
+    Expr operator()(const SetExpr& e) const {
+        return Expr{SetExpr{
+            e.value ? std::make_unique<Expr>(Clone(*e.value)) : nullptr, e.name,
+            e.object ? std::make_unique<Expr>(Clone(*e.object)) : nullptr}};
+    }
     Expr operator()(const AssignExpr& e) const {
         return Expr{
             AssignExpr{e.name, e.value ? std::make_unique<Expr>(Clone(*e.value))

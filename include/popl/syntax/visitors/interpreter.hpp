@@ -58,6 +58,7 @@ class Interpreter {
     PopLObject operator()(const VariableExpr& expr, const Expr&) const;
     PopLObject operator()(const LiteralExpr& expr, const Expr&) const;
     PopLObject operator()(const GetExpr& expr, const Expr&);
+    PopLObject operator()(const SetExpr& expr, const Expr&);
 
    private:
     PopLObject Evaluate(const Expr& expr);

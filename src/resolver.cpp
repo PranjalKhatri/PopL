@@ -179,4 +179,8 @@ void Resolver::operator()(GroupingExpr& expr, Expr&) {
 void Resolver::operator()(LiteralExpr& expr, Expr&) {}
 
 void Resolver::operator()(GetExpr& expr, Expr&) { Resolve(*expr.object); }
+void Resolver::operator()(SetExpr& expr, Expr&) {
+    Resolve(*expr.value);
+    Resolve(*expr.object);
+}
 };  // namespace popl
