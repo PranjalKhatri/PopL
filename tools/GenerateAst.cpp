@@ -178,7 +178,8 @@ int main(int argc, char** argv) {
                     exprBaseName),
         std::format("Assign{}: Token name, {}* value, std::optional<int> depth",
                     exprBaseName, exprBaseName),
-    };
+        std::format("Set{}: {}* object, Token name, {}* value", exprBaseName,
+                    exprBaseName, exprBaseName)};
 
     std::vector<std::string> StmtTypes = {
         std::format("Block{}: std::vector<std::unique_ptr<{}>> statements",
@@ -198,9 +199,7 @@ int main(int argc, char** argv) {
                     exprBaseName),
         std::format("Class{}: Token name, "
                     "std::vector<std::unique_ptr<Function{}>> methods",
-                    stmtBaseName, stmtBaseName),
-        std::format("Set{}: {}* object, Token name, {}* value", stmtBaseName,
-                    exprBaseName, exprBaseName)};
+                    stmtBaseName, stmtBaseName)};
 
     DefineAst(exprBaseName, outputDir, ExprTypes);
     DefineAst(stmtBaseName, outputDir, StmtTypes);

@@ -73,11 +73,17 @@ struct AssignExpr {
     std::optional<int>    depth;
 };
 
+struct SetExpr {
+    std::unique_ptr<Expr> object;
+    Token                 name;
+    std::unique_ptr<Expr> value;
+};
+
 struct Expr {
     using Variant =
         std::variant<NilExpr, BinaryExpr, TernaryExpr, GroupingExpr,
                      LiteralExpr, UnaryExpr, CallExpr, VariableExpr,
-                     LogicalExpr, FunctionExpr, GetExpr, AssignExpr>;
+                     LogicalExpr, FunctionExpr, GetExpr, AssignExpr, SetExpr>;
 
     Variant node;
 };
