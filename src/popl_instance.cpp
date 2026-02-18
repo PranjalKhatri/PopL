@@ -15,4 +15,8 @@ const popl::PopLObject& PoplInstance::Get(const Token& name) {
     if (it != m_fields.end()) return it->second;
     throw RunTimeError(name, "Undefined property '" + name.GetLexeme() + "'.");
 }
+
+void PoplInstance::Set(Token name, popl::PopLObject value) {
+    m_fields.insert_or_assign(std::move(name.GetLexeme()), std::move(value));
+}
 };  // namespace popl::runtime

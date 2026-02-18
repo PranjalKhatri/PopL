@@ -11,7 +11,6 @@ class PopLObject;
 
 namespace popl::runtime {
 
-class PopLObject;
 class PoplClass;
 
 class PoplInstance {
@@ -20,6 +19,7 @@ class PoplInstance {
         : m_creator(klass) {}
 
     const popl::PopLObject& Get(const popl::Token& name);
+    void                    Set(Token name, popl::PopLObject value);
 
     std::string ToString() const;
 
