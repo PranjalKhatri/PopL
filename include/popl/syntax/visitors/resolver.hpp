@@ -17,7 +17,6 @@ class Resolver {
     void operator()(NilStmt& stmt, Stmt&);
     void operator()(VarStmt& stmt, Stmt&);
     void operator()(BlockStmt& stmt, Stmt&);
-    void operator()(AssignStmt& stmt, Stmt&);
     void operator()(IfStmt& stmt, Stmt&);
     void operator()(WhileStmt& stmt, Stmt&);
     void operator()(BreakStmt& stmt, Stmt&);
@@ -36,6 +35,7 @@ class Resolver {
     void operator()(NilExpr& expr, Expr&);
     void operator()(LogicalExpr& expr, Expr&);
     void operator()(CallExpr& expr, Expr&);
+    void operator()(AssignExpr& expr, Expr&);
     void operator()(FunctionExpr& expr, Expr&);
     void operator()(GetExpr& expr, Expr&);
 
@@ -63,7 +63,18 @@ class Resolver {
     void Declare(const Token& name);
     void Define(const Token& name);
 
-    void ResolveLocal(VariableExpr& expr, const Token& name);
+    template <typename T>
+        requires requires(T t) { t.depth; }
+    void ResolveLocal(T& expr, const Token& name) {
+        for (int i = static_cast<int>(m_scopes.size()) - 1; i >= 0; --i) {
+            auto it = m_scopes[i].find(name.GetLexeme());
+            if (it != m_scopes[i].end()) {
+                it->second.used = true;
+                expr.depth      = static_cast<int>(m_scopes.size()) - 1 - i;
+                return;
+            }
+        }
+    }
     void ResolveFunction(FunctionExpr& expr, FunctionType type);
 
     void Resolve(Stmt& statement);

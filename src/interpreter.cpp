@@ -58,10 +58,7 @@ void Interpreter::operator()(const BlockStmt& stmt, const Stmt&) {
     auto blockEnv = std::make_shared<Environment>(m_current_environment);
     ExecuteBlock(stmt.statements, blockEnv);
 }
-void Interpreter::operator()(const AssignStmt& stmt, const Stmt&) {
-    PopLObject value{Evaluate(*(stmt.value))};
-    m_current_environment->Assign(stmt.name, value);
-}
+
 void Interpreter::operator()(IfStmt& stmt, const Stmt&) {
     if (Evaluate(*stmt.condition).isTruthy())
         Execute(*stmt.thenBranch);
@@ -107,6 +104,15 @@ void Interpreter::operator()(ClassStmt& stmt, const Stmt&) {
  */
 PopLObject Interpreter::operator()(const LiteralExpr& expr, const Expr&) const {
     return expr.value;
+}
+
+PopLObject Interpreter::operator()(const AssignExpr& expr, const Expr&) {
+    PopLObject value = Evaluate(*expr.value);
+
+    if (expr.depth.has_value())
+        m_current_environment->AssignAt(expr.depth.value(), expr.name, value);
+    m_global_environment->Assign(expr.name, value);
+    return value;
 }
 
 PopLObject Interpreter::operator()(const GroupingExpr& expr, const Expr&) {

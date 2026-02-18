@@ -83,6 +83,11 @@ struct ExprCloner {
     Expr operator()(const GetExpr& e) const {
         return Expr{GetExpr{std::make_unique<Expr>(Clone(*e.object)), e.name}};
     }
+    Expr operator()(const AssignExpr& e) const {
+        return Expr{
+            AssignExpr{e.name, e.value ? std::make_unique<Expr>(Clone(*e.value))
+                                       : nullptr}};
+    }
 };
 
 Expr Clone(const Expr& expr) { return visitExprWithArgs(expr, ExprCloner{}); }
@@ -113,12 +118,6 @@ struct StmtCloner {
         return Stmt{VarStmt{s.name, s.initializer ? std::make_unique<Expr>(
                                                         Clone(*s.initializer))
                                                   : nullptr}};
-    }
-
-    Stmt operator()(const AssignStmt& s) const {
-        return Stmt{
-            AssignStmt{s.name, s.value ? std::make_unique<Expr>(Clone(*s.value))
-                                       : nullptr}};
     }
 
     Stmt operator()(const IfStmt& s) const {

@@ -58,18 +58,6 @@ void Resolver::Resolve(std::vector<std::unique_ptr<Stmt>>& statements) {
     for (auto& stmt : statements) Resolve(*stmt);
 }
 
-void Resolver::ResolveLocal(VariableExpr& expr, const Token& name) {
-    // iterate from innermost scope to outermost
-    for (int i = static_cast<int>(m_scopes.size()) - 1; i >= 0; --i) {
-        auto it = m_scopes[i].find(name.GetLexeme());
-        if (it != m_scopes[i].end()) {
-            it->second.used = true;
-            expr.depth      = static_cast<int>(m_scopes.size()) - 1 - i;
-            return;
-        }
-    }
-}
-
 void Resolver::ResolveFunction(FunctionExpr& expr, FunctionType funcType) {
     ScopeGuard guard(m_scopes);
 
@@ -92,17 +80,6 @@ void Resolver::operator()(VarStmt& stmt, Stmt&) {
 void Resolver::operator()(BlockStmt& stmt, Stmt&) {
     ScopeGuard guard(m_scopes);
     Resolve(stmt.statements);
-}
-void Resolver::operator()(AssignStmt& stmt, Stmt&) {
-    Resolve(*stmt.value);
-    if (!m_scopes.empty()) {
-        auto& currentScope = m_scopes.back();
-        auto  it           = currentScope.find(stmt.name.GetLexeme());
-        if (it != currentScope.end() && it->second.defined == false) {
-            Diagnostics::Error(
-                stmt.name, "Can't read local variable in its own initializer.");
-        }
-    }
 }
 void Resolver::operator()(FunctionStmt& stmt, Stmt&) {
     Declare(stmt.name);
@@ -164,6 +141,19 @@ void Resolver::operator()(VariableExpr& expr, Expr& originalExpr) {
 void Resolver::operator()(CallExpr& expr, Expr&) {
     Resolve(*expr.callee);
     for (auto& arg : expr.arguments) Resolve(*arg);
+}
+
+void Resolver::operator()(AssignExpr& expr, Expr&) {
+    Resolve(*expr.value);
+    if (!m_scopes.empty()) {
+        auto& currentScope = m_scopes.back();
+        auto  it           = currentScope.find(expr.name.GetLexeme());
+        if (it != currentScope.end() && it->second.defined == false) {
+            Diagnostics::Error(
+                expr.name, "Can't read local variable in its own initializer.");
+        }
+    }
+    ResolveLocal(expr, expr.name);
 }
 void Resolver::operator()(FunctionExpr& expr, Expr&) {
     ResolveFunction(expr, FunctionType::FUNCTION);

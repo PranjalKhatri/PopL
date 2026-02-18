@@ -34,7 +34,6 @@ class Interpreter {
     void operator()(const NilStmt& stmt, const Stmt&);
     void operator()(const VarStmt& stmt, const Stmt&);
     void operator()(const BlockStmt& stmt, const Stmt&);
-    void operator()(const AssignStmt& stmt, const Stmt&);
     void operator()(IfStmt& stmt, const Stmt&);
     void operator()(WhileStmt& stmt, const Stmt&);
     void operator()(const BreakStmt& stmt, const Stmt&);
@@ -55,6 +54,7 @@ class Interpreter {
     PopLObject operator()(const TernaryExpr& expr, const Expr&);
     PopLObject operator()(const UnaryExpr& expr, const Expr&);
     PopLObject operator()(const BinaryExpr& expr, const Expr&);
+    PopLObject operator()(const AssignExpr& expr, const Expr&);
     PopLObject operator()(const VariableExpr& expr, const Expr&) const;
     PopLObject operator()(const LiteralExpr& expr, const Expr&) const;
     PopLObject operator()(const GetExpr& expr, const Expr&);
