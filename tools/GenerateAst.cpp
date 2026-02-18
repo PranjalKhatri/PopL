@@ -175,15 +175,16 @@ int main(int argc, char** argv) {
                     "std::vector<std::unique_ptr<{}>> body",
                     exprBaseName, stmtBaseName),
         std::format("Get{}: {}* object, Token name", exprBaseName,
-                    exprBaseName)};
+                    exprBaseName),
+        std::format("Assign{}: Token name, {}* value, std::optional<int> depth",
+                    exprBaseName, exprBaseName),
+    };
 
     std::vector<std::string> StmtTypes = {
         std::format("Block{}: std::vector<std::unique_ptr<{}>> statements",
                     stmtBaseName, stmtBaseName),
         std::format("Expression{}: {}* expression", stmtBaseName, exprBaseName),
         std::format("Var{}: Token name, {}* initializer", stmtBaseName,
-                    exprBaseName),
-        std::format("Assign{}: Token name, {}* value", stmtBaseName,
                     exprBaseName),
         std::format("If{}: {}* condition, {}* thenBranch, {}* elseBranch",
                     stmtBaseName, exprBaseName, stmtBaseName, stmtBaseName),

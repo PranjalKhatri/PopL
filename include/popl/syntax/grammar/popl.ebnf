@@ -6,10 +6,9 @@ funcDecl          -> "fun" function;
 function          -> IDENTIFIER "(" parameters? ")" block ;
 parameters        -> IDENTIFIER ( "," IDENTIFIER ) ;
 varDecl           -> "var" IDENTIFIER ( "=" expression )? ";" ;
-statement         -> assignment | exprStatement | block | ifStatement 
+statement         -> exprStatement | block | ifStatement 
                      | whileStatement | forStatement | breakStatement | continueStatement | returnStatement ;
 
-assignment        -> ( call "." )? IDENTIFIER "=" expression ";" ;
 exprStatement     -> expression ";" ;
 block             -> "{" declaration* "}" ;
 ifStatement       -> "if" "(" expression ")" statement ("else" statement)? ;
@@ -20,7 +19,8 @@ continueStatement -> "continue" ";" ;
 returnStatement   -> "return" expression? ";" ;
 
 expression        -> comma ;
-comma             -> ternary ( "," ternary )* ;
+comma             -> assignment ( "," assignment )* ;
+assignment        -> ( IDENTIFIER "=" assignment ) | ternary ;
 ternary           -> logic_or ("?" expression ":" ternary )? ;
 
 logic_or          -> logic_and ( "or" logic_and )* ;
