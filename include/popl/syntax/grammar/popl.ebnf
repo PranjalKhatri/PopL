@@ -20,7 +20,7 @@ returnStatement   -> "return" expression? ";" ;
 
 expression        -> comma ;
 comma             -> assignment ( "," assignment )* ;
-assignment        -> ( IDENTIFIER "=" assignment ) | ternary ;
+assignment        -> (call "." )? ( IDENTIFIER "=" assignment ) | ternary ;
 ternary           -> logic_or ("?" expression ":" ternary )? ;
 
 logic_or          -> logic_and ( "or" logic_and )* ;
