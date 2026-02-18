@@ -1,6 +1,7 @@
 #include "popl/syntax/grammar/parser.hpp"
 
 #include <memory>
+#include <variant>
 #include <vector>
 
 #include "popl/lexer/token_types.hpp"
@@ -88,9 +89,6 @@ Stmt Parser::Statement() {
     if (Match({TokenType::BREAK})) return BreakStatement();
     if (Match({TokenType::CONTINUE})) return ContinueStatement();
     if (Match({TokenType::RETURN})) return ReturnStatement();
-    if (!IsAtEnd() && PeekNext().GetType() == TokenType::EQUAL &&
-        Match({TokenType::IDENTIFIER}))
-        return AssignmentStatement();
     if (Match({TokenType::LEFT_BRACE}))
         return Stmt{BlockStmt{BlockStatement()}};
     return ExpressionStatement();
@@ -189,13 +187,6 @@ Stmt Parser::IfStatement() {
                        MakeStmtPtr(std::move(thenBranch)),
                        MakeStmtPtr(std::move(elseBranch))}};
 }
-Stmt Parser::AssignmentStatement() {
-    Token name = Previous();
-    Consume(TokenType::EQUAL, "Expects = after an identifier name");
-    auto value{MakeExprPtr(Expression())};
-    Consume(TokenType::SEMICOLON, "Expects ; after Assignments.");
-    return Stmt{AssignStmt{std::move(name), std::move(value)}};
-}
 
 Stmt Parser::ExpressionStatement() {
     auto expr = MakeExprPtr(Expression());
@@ -234,11 +225,25 @@ void Parser::Synchronize() {
     }
 }
 
+Expr Parser::ArgumentExpression() { return Ternary(); }
 Expr Parser::Expression() { return Comma(); }
 Expr Parser::Comma() {
-    return ParseBinary(&Parser::Ternary, {TokenType::COMMA});
+    return ParseBinary(&Parser::Assignment, {TokenType::COMMA});
 }
-Expr Parser::ArgumentExpression() { return Ternary(); }
+Expr Parser::Assignment() {
+    Expr expr{Ternary()};
+    if (Match({TokenType::EQUAL})) {
+        Token equal{Previous()};
+        Expr  value{Assignment()};
+        if (std::holds_alternative<VariableExpr>(expr.node)) {
+            VariableExpr varExpr{std::move(std::get<VariableExpr>(expr.node))};
+            Token        name = varExpr.name;
+            return Expr{AssignExpr{name, MakeExprPtr(std::move(value))}};
+        }
+        Diagnostics::Error(equal, "Invalid assignment target.");
+    }
+    return expr;
+}
 
 Expr Parser::Ternary() {
     Expr expr = OrExpression();
