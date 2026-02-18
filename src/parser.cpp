@@ -239,6 +239,10 @@ Expr Parser::Assignment() {
             VariableExpr varExpr{std::move(std::get<VariableExpr>(expr.node))};
             Token        name = varExpr.name;
             return Expr{AssignExpr{name, MakeExprPtr(std::move(value))}};
+        } else if (std::holds_alternative<GetExpr>(expr.node)) {
+            GetExpr gexp{std::move(std::get<GetExpr>(expr.node))};
+            return Expr{SetExpr{std::move(gexp.object), gexp.name,
+                                MakeExprPtr(std::move(value))}};
         }
         Diagnostics::Error(equal, "Invalid assignment target.");
     }
