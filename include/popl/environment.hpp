@@ -30,6 +30,10 @@ class Environment {
         PopLObject& obj = Lookup(name);
         obj             = std::move(value);
     }
+    void AssignAt(int depth, const Token& name, PopLObject value) {
+        PopLObject& obj = LookupAt(depth, name);
+        obj             = std::move(value);
+    }
 
    private:
     PopLObject& LookupAt(int depth, const Token& name) {
