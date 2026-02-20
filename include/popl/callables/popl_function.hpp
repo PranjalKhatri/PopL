@@ -6,6 +6,7 @@
 
 #include "callable.hpp"
 #include "popl/environment.hpp"
+#include "popl/runtime/popl_instance.hpp"
 #include "popl/syntax/ast/expr.hpp"
 
 namespace popl::callable {
@@ -21,6 +22,8 @@ class PoplFunction : public PoplCallable {
     PopLObject Call(Interpreter&                   interpreter,
                     const std::vector<PopLObject>& args) override;
 
+    std::shared_ptr<PoplFunction> Bind(
+        std::shared_ptr<runtime::PoplInstance> instance);
     int GetArity() const override { return m_declaration->params.size(); }
     std::string ToString() const override;
 

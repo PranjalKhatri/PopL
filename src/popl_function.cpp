@@ -22,6 +22,13 @@ PopLObject PoplFunction::Call(Interpreter&                   interpreter,
     return PopLObject{NilValue{}};
 }
 
+std::shared_ptr<PoplFunction> PoplFunction::Bind(
+    std::shared_ptr<runtime::PoplInstance> instance) {
+    auto environment = std::make_shared<Environment>(m_closure);
+    environment->Define("this", PopLObject{instance});
+
+    return std::make_shared<PoplFunction>(m_declaration, environment, m_name);
+}
 std::string PoplFunction::ToString() const {
     if (m_name) {
         return std::format("<fn {} (arity:{})>", *m_name, GetArity());
