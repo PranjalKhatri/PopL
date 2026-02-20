@@ -333,6 +333,7 @@ Expr Parser::Primary() {
         return Expr{LiteralExpr(Previous().GetLiteral())};
     }
 
+    if (Match({TokenType::THIS})) return Expr{ThisExpr{Previous()}};
     if (Match({TokenType::IDENTIFIER})) {
         return Expr{VariableExpr{Previous()}};
     }
