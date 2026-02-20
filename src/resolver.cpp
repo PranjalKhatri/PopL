@@ -87,9 +87,14 @@ void Resolver::operator()(FunctionStmt& stmt, Stmt&) {
     ResolveFunction(*stmt.func, FunctionType::FUNCTION);
 }
 void Resolver::operator()(ClassStmt& stmt, Stmt&) {
+    ClassType enclosingClass = m_current_class_type;
+    m_current_class_type     = ClassType::CLASS;
+
     Declare(stmt.name);
     Define(stmt.name);
+
     ScopeGuard guard{m_scopes};
+
     m_scopes.back().insert_or_assign(
         "this",
         VariableInfo{
@@ -102,6 +107,8 @@ void Resolver::operator()(ClassStmt& stmt, Stmt&) {
         // will be accessed using this ptr only
         ResolveFunction(*method->func, FunctionType::METHOD);
     }
+
+    m_current_class_type = enclosingClass;
 }
 
 void Resolver::operator()(ExpressionStmt& stmt, Stmt&) {
@@ -197,6 +204,10 @@ void Resolver::operator()(SetExpr& expr, Expr&) {
     Resolve(*expr.object);
 }
 void Resolver::operator()(ThisExpr& expr, Expr&) {
+    if (m_current_class_type != ClassType::CLASS) {
+        Diagnostics::Error(expr.keyword, "Can't use this outside of class.");
+        return;
+    }
     ResolveLocal(expr, expr.keyword);
 }
 };  // namespace popl

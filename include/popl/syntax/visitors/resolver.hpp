@@ -43,6 +43,7 @@ class Resolver {
 
    private:
     enum class FunctionType { NONE, FUNCTION, METHOD };
+    enum class ClassType { NONE, CLASS };
     enum class LoopType { NONE, LOOP };
     struct VariableInfo {
         bool  defined = false;
@@ -88,6 +89,7 @@ class Resolver {
     std::vector<std::unordered_map<std::string, VariableInfo>> m_scopes{};
 
     FunctionType m_current_function_type{FunctionType::NONE};
+    ClassType    m_current_class_type{ClassType::NONE};
     LoopType     m_current_loop_type{LoopType::NONE};
 };
 
