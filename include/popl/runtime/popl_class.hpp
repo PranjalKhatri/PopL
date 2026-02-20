@@ -21,9 +21,9 @@ class PoplClass : public popl::callable::PoplCallable,
     popl::PopLObject Call(popl::Interpreter&                   interpreter,
                           const std::vector<popl::PopLObject>& args) override;
     std::optional<std::shared_ptr<callable::PoplFunction>> GetMethod(
-        const std::string& name);
+        const std::string& name) const;
     std::string ToString() const override { return m_name; }
-    int         GetArity() const override { return 0; }
+    int         GetArity() const override;
 
    private:
     std::string m_name;
