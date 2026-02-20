@@ -41,7 +41,7 @@ class Resolver {
     void operator()(SetExpr& expr, Expr&);
 
    private:
-    enum class FunctionType { NONE, FUNCTION };
+    enum class FunctionType { NONE, FUNCTION, METHOD };
     enum class LoopType { NONE, LOOP };
     struct VariableInfo {
         bool  defined = false;

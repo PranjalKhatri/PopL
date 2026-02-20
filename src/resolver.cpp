@@ -88,6 +88,11 @@ void Resolver::operator()(FunctionStmt& stmt, Stmt&) {
 }
 void Resolver::operator()(ClassStmt& stmt, Stmt&) {
     Declare(stmt.name);
+    for (auto& method : stmt.methods) {
+        Declare(method->name);
+        Define(method->name);
+        ResolveFunction(*method->func, FunctionType::METHOD);
+    }
     Define(stmt.name);
 }
 
@@ -126,7 +131,7 @@ void Resolver::operator()(ReturnStmt& stmt, Stmt&) {
     if (stmt.value) Resolve(*stmt.value);
 }
 
-void Resolver::operator()(VariableExpr& expr, Expr& originalExpr) {
+void Resolver::operator()(VariableExpr& expr, Expr&) {
     if (!m_scopes.empty()) {
         auto& currentScope = m_scopes.back();
         auto  it           = currentScope.find(expr.name.GetLexeme());
