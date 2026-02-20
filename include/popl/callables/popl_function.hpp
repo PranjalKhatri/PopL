@@ -14,10 +14,11 @@ class PoplFunction : public PoplCallable {
    public:
     PoplFunction(const FunctionExpr*          declaration,
                  std::shared_ptr<Environment> closure,
-                 std::optional<std::string>   name)
+                 std::optional<std::string> name, bool isInitializer)
         : m_declaration{declaration},
           m_name(std::move(name)),
-          m_closure(std::move(closure)) {}
+          m_closure(std::move(closure)),
+          m_isInitializer(isInitializer) {}
 
     PopLObject Call(Interpreter&                   interpreter,
                     const std::vector<PopLObject>& args) override;
@@ -28,6 +29,7 @@ class PoplFunction : public PoplCallable {
     std::string ToString() const override;
 
    private:
+    bool                         m_isInitializer;
     const FunctionExpr*          m_declaration;
     std::optional<std::string>   m_name;
     std::shared_ptr<Environment> m_closure;

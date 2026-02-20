@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "popl/environment.hpp"
+#include "popl/lexer/token_types.hpp"
 #include "popl/literal.hpp"
 #include "popl/runtime/control_flow.hpp"
 #include "popl/syntax/visitors/interpreter.hpp"
@@ -13,6 +14,10 @@ PopLObject PoplFunction::Call(Interpreter&                   interpreter,
     auto localEnv{std::make_shared<Environment>(m_closure)};
     for (size_t i = 0; i < m_declaration->params.size(); ++i) {
         localEnv->Define(m_declaration->params[i], args[i]);
+    }
+    if (m_isInitializer) {
+        return m_closure->GetAt(
+            0, Token{TokenType::THIS, "this", PopLObject{NilValue{}}, 0});
     }
     try {
         interpreter.ExecuteBlock(m_declaration->body, localEnv);
@@ -27,7 +32,8 @@ std::shared_ptr<PoplFunction> PoplFunction::Bind(
     auto environment = std::make_shared<Environment>(m_closure);
     environment->Define("this", PopLObject{instance});
 
-    return std::make_shared<PoplFunction>(m_declaration, environment, m_name);
+    return std::make_shared<PoplFunction>(m_declaration, environment, m_name,
+                                          m_isInitializer);
 }
 std::string PoplFunction::ToString() const {
     if (m_name) {
