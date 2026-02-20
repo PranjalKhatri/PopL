@@ -13,6 +13,9 @@ struct StmtCloner;
 // Expression Cloner
 struct ExprCloner {
     Expr operator()(const NilExpr&) const { return Expr{NilExpr{}}; }
+    Expr operator()(const ThisExpr& expr) const {
+        return Expr{ThisExpr{expr.keyword}};
+    };
 
     Expr operator()(const BinaryExpr& e) const {
         return Expr{BinaryExpr{
