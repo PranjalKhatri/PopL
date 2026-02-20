@@ -105,7 +105,9 @@ void Resolver::operator()(ClassStmt& stmt, Stmt&) {
     for (auto& method : stmt.methods) {
         // Class methods don't need to be declared or defined before since they
         // will be accessed using this ptr only
-        ResolveFunction(*method->func, FunctionType::METHOD);
+        FunctionType tp = FunctionType::METHOD;
+        if (method->name.GetLexeme() == "init") tp = FunctionType::INITIALIZER;
+        ResolveFunction(*method->func, tp);
     }
 
     m_current_class_type = enclosingClass;
@@ -142,6 +144,10 @@ void Resolver::operator()(ContinueStmt& stmt, Stmt&) {
 void Resolver::operator()(ReturnStmt& stmt, Stmt&) {
     if (m_current_function_type == FunctionType::NONE) {
         Diagnostics::Error(stmt.keyword, "Can't return from top-level code.");
+    }
+    if (m_current_function_type == FunctionType::INITIALIZER) {
+        Diagnostics::Error(stmt.keyword,
+                           "Can't return a value from an initializer");
     }
     if (stmt.value) Resolve(*stmt.value);
 }

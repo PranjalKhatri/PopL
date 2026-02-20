@@ -42,7 +42,7 @@ class Resolver {
     void operator()(ThisExpr& expr, Expr&);
 
    private:
-    enum class FunctionType { NONE, FUNCTION, METHOD };
+    enum class FunctionType { NONE, FUNCTION, METHOD, INITIALIZER };
     enum class ClassType { NONE, CLASS };
     enum class LoopType { NONE, LOOP };
     struct VariableInfo {
