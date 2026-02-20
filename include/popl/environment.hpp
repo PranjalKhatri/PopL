@@ -26,6 +26,9 @@ class Environment {
     void Define(const Token& name, PopLObject value) {
         m_values.insert_or_assign(name.GetLexeme(), std::move(value));
     }
+    void Define(const std::string& name, PopLObject value) {
+        m_values.insert_or_assign(name, std::move(value));
+    }
     void Assign(const Token& name, PopLObject value) {
         PopLObject& obj = Lookup(name);
         obj             = std::move(value);
