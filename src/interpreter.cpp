@@ -115,6 +115,11 @@ PopLObject Interpreter::operator()(const LiteralExpr& expr, const Expr&) const {
     return expr.value;
 }
 
+PopLObject Interpreter::operator()(const ThisExpr& expr, const Expr&) const {
+    if (expr.depth.has_value())
+        return m_current_environment->GetAt(expr.depth.value(), expr.keyword);
+    return m_global_environment->Get(expr.keyword);
+}
 PopLObject Interpreter::operator()(const AssignExpr& expr, const Expr&) {
     PopLObject value = Evaluate(*expr.value);
 

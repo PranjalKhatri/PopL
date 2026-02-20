@@ -39,6 +39,7 @@ class Resolver {
     void operator()(FunctionExpr& expr, Expr&);
     void operator()(GetExpr& expr, Expr&);
     void operator()(SetExpr& expr, Expr&);
+    void operator()(ThisExpr& expr, Expr&);
 
    private:
     enum class FunctionType { NONE, FUNCTION, METHOD };

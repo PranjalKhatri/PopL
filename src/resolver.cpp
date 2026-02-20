@@ -88,12 +88,20 @@ void Resolver::operator()(FunctionStmt& stmt, Stmt&) {
 }
 void Resolver::operator()(ClassStmt& stmt, Stmt&) {
     Declare(stmt.name);
+    Define(stmt.name);
+    ScopeGuard guard{m_scopes};
+    m_scopes.back().insert_or_assign(
+        "this",
+        VariableInfo{
+            .defined = true,
+            .used    = true,
+            .keyword = stmt.name});  // used and defined both true to not get
+                                     // unused local variable error
     for (auto& method : stmt.methods) {
-        Declare(method->name);
-        Define(method->name);
+        // Class methods don't need to be declared or defined before since they
+        // will be accessed using this ptr only
         ResolveFunction(*method->func, FunctionType::METHOD);
     }
-    Define(stmt.name);
 }
 
 void Resolver::operator()(ExpressionStmt& stmt, Stmt&) {
@@ -187,5 +195,8 @@ void Resolver::operator()(GetExpr& expr, Expr&) { Resolve(*expr.object); }
 void Resolver::operator()(SetExpr& expr, Expr&) {
     Resolve(*expr.value);
     Resolve(*expr.object);
+}
+void Resolver::operator()(ThisExpr& expr, Expr&) {
+    ResolveLocal(expr, expr.keyword);
 }
 };  // namespace popl
