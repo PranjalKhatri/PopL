@@ -179,7 +179,10 @@ int main(int argc, char** argv) {
         std::format("Assign{}: Token name, {}* value, std::optional<int> depth",
                     exprBaseName, exprBaseName),
         std::format("Set{}: {}* object, Token name, {}* value", exprBaseName,
-                    exprBaseName, exprBaseName)};
+                    exprBaseName, exprBaseName),
+        std::format("This{}: Token Keyword, std::optional<int> depth",
+                    exprBaseName),
+    };
 
     std::vector<std::string> StmtTypes = {
         std::format("Block{}: std::vector<std::unique_ptr<{}>> statements",
