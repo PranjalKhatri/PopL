@@ -95,7 +95,16 @@ void Interpreter::operator()(FunctionStmt& stmt, const Stmt&) {
 }
 void Interpreter::operator()(ClassStmt& stmt, const Stmt&) {
     m_current_environment->Define(stmt.name, PopLObject(NilValue{}));
-    auto klass = std::make_shared<runtime::PoplClass>(stmt.name.GetLexeme());
+    std::unordered_map<std::string, std::shared_ptr<callable::PoplFunction>>
+        methods;
+    for (auto& method : stmt.methods) {
+        auto func = std::make_shared<callable::PoplFunction>(
+            method->func.get(), m_current_environment,
+            method->name.GetLexeme());
+        methods.insert_or_assign(method->name.GetLexeme(), std::move(func));
+    }
+    auto klass = std::make_shared<runtime::PoplClass>(stmt.name.GetLexeme(),
+                                                      std::move(methods));
     m_current_environment->Assign(stmt.name, PopLObject{klass});
 }
 
