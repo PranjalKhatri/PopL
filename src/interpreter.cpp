@@ -90,7 +90,7 @@ void Interpreter::operator()(WhileStmt& stmt, const Stmt&) {
 void Interpreter::operator()(FunctionStmt& stmt, const Stmt&) {
     Token name = stmt.name;
     auto  func = std::make_shared<callable::PoplFunction>(
-        stmt.func.get(), m_current_environment, stmt.name.GetLexeme());
+        stmt.func.get(), m_current_environment, stmt.name.GetLexeme(), false);
     m_current_environment->Define(name, PopLObject{func});
 }
 void Interpreter::operator()(ClassStmt& stmt, const Stmt&) {
@@ -99,8 +99,8 @@ void Interpreter::operator()(ClassStmt& stmt, const Stmt&) {
         methods;
     for (auto& method : stmt.methods) {
         auto func = std::make_shared<callable::PoplFunction>(
-            method->func.get(), m_current_environment,
-            method->name.GetLexeme());
+            method->func.get(), m_current_environment, method->name.GetLexeme(),
+            method->name.GetLexeme() == "init");
         methods.insert_or_assign(method->name.GetLexeme(), std::move(func));
     }
     auto klass = std::make_shared<runtime::PoplClass>(stmt.name.GetLexeme(),
@@ -175,7 +175,7 @@ PopLObject Interpreter::operator()(const CallExpr& expr, const Expr&) {
 
 PopLObject Interpreter::operator()(const FunctionExpr& expr, const Expr&) {
     auto function = std::make_shared<callable::PoplFunction>(
-        &expr, m_current_environment, std::nullopt);
+        &expr, m_current_environment, std::nullopt, false);
 
     return PopLObject{function};
 }
