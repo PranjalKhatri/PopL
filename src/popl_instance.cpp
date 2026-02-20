@@ -14,7 +14,7 @@ popl::PopLObject PoplInstance::Get(const Token& name) {
     auto it = m_fields.find(name.GetLexeme());
     if (it != m_fields.end()) return it->second;
     auto method{m_creator_class->GetMethod(name.GetLexeme())};
-    if (method) return PopLObject{method.value()};
+    if (method) return PopLObject{method.value()->Bind(shared_from_this())};
     throw RunTimeError(name, "Undefined property '" + name.GetLexeme() + "'.");
 }
 

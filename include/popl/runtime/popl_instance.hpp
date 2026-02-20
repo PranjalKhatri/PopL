@@ -13,7 +13,7 @@ namespace popl::runtime {
 
 class PoplClass;
 
-class PoplInstance {
+class PoplInstance : public std::enable_shared_from_this<PoplInstance> {
    public:
     explicit PoplInstance(std::shared_ptr<PoplClass> klass)
         : m_creator_class(klass) {}
