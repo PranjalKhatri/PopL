@@ -16,15 +16,15 @@ class PoplClass;
 class PoplInstance {
    public:
     explicit PoplInstance(std::shared_ptr<PoplClass> klass)
-        : m_creator(klass) {}
+        : m_creator_class(klass) {}
 
-    const popl::PopLObject& Get(const popl::Token& name);
-    void                    Set(Token name, popl::PopLObject value);
+    popl::PopLObject Get(const popl::Token& name);
+    void             Set(Token name, popl::PopLObject value);
 
     std::string ToString() const;
 
    private:
-    std::shared_ptr<PoplClass>                        m_creator;
+    std::shared_ptr<PoplClass>                        m_creator_class;
     std::unordered_map<std::string, popl::PopLObject> m_fields;
 };
 };  // namespace popl::runtime

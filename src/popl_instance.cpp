@@ -8,11 +8,13 @@
 namespace popl::runtime {
 
 std::string PoplInstance::ToString() const {
-    return "Instance of " + m_creator->ToString();
+    return "Instance of " + m_creator_class->ToString();
 }
-const popl::PopLObject& PoplInstance::Get(const Token& name) {
+popl::PopLObject PoplInstance::Get(const Token& name) {
     auto it = m_fields.find(name.GetLexeme());
     if (it != m_fields.end()) return it->second;
+    auto method{m_creator_class->GetMethod(name.GetLexeme())};
+    if (method) return PopLObject{method.value()};
     throw RunTimeError(name, "Undefined property '" + name.GetLexeme() + "'.");
 }
 
